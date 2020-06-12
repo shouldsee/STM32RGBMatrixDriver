@@ -1,0 +1,1704 @@
+ARM GAS  /tmp/ccrbWbmS.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.eabi_attribute 27, 1
+   4              		.eabi_attribute 28, 1
+   5              		.fpu fpv4-sp-d16
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.thumb
+  16              		.file	"main.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.section	.text.randomizeFramebuffer,"ax",%progbits
+  21              		.align	2
+  22              		.global	randomizeFramebuffer
+  23              		.thumb
+  24              		.thumb_func
+  26              	randomizeFramebuffer:
+  27              	.LFB125:
+  28              		.file 1 "src/main.c"
+   1:src/main.c    **** #include <stdio.h>
+   2:src/main.c    **** #include "stm32f4xx.h"
+   3:src/main.c    **** // #include "stm32f4xx_gpio.h"
+   4:src/main.c    **** // #include "stm32f4xx_rcc.h"
+   5:src/main.c    **** #include "math.h"
+   6:src/main.c    **** #include "string.h"
+   7:src/main.c    **** #include "stdlib.h"
+   8:src/main.c    **** #include "main.h"
+   9:src/main.c    **** #include "matrix_config.h"
+  10:src/main.c    **** 
+  11:src/main.c    **** const int waits[] = { 5, 10, 20, 40, 80, 160, 320, 640 };
+  12:src/main.c    **** const int scan = MATRIX_HEIGHT / 2;
+  13:src/main.c    **** uint8_t gammaTable[256];
+  14:src/main.c    **** uint32_t bufferA[MATRIX_SIZE];
+  15:src/main.c    **** uint32_t bufferB[MATRIX_SIZE];
+  16:src/main.c    **** uint32_t birthRate = 0;
+  17:src/main.c    **** 
+  18:src/main.c    **** // ----- Timing definitions -------------------------------------------------
+  19:src/main.c    **** 
+  20:src/main.c    **** int main() {
+  21:src/main.c    **** 	setupRGBMatrixPorts();
+  22:src/main.c    **** 
+  23:src/main.c    **** 	LED_PORT->BSRRH = LED_P;
+  24:src/main.c    **** 
+  25:src/main.c    **** 	// precalculate the gamma lookup table
+  26:src/main.c    **** 	int i=0;
+  27:src/main.c    **** 	for (; i < 256; i++) gammaTable[i] = 255 * pow((i / 256.0), 1.6);
+  28:src/main.c    **** 
+  29:src/main.c    **** 	// clear framebuffers
+  30:src/main.c    **** 	memset(bufferA, 0, sizeof(bufferA));
+ARM GAS  /tmp/ccrbWbmS.s 			page 2
+
+
+  31:src/main.c    **** 	memset(bufferB, 0, sizeof(bufferB));
+  32:src/main.c    **** 
+  33:src/main.c    **** 
+  34:src/main.c    **** 	// test pattern, light up a led in each corner
+  35:src/main.c    **** 	bufferA[0]    = 0x00000050;
+  36:src/main.c    **** 	bufferA[31]   = 0x00005000;
+  37:src/main.c    **** 	bufferA[992]  = 0x00500000;
+  38:src/main.c    **** 	bufferA[1023] = 0x00505000;
+  39:src/main.c    **** 
+  40:src/main.c    **** 	// display test pattern for 500 frames
+  41:src/main.c    **** 	for (int i = 0; i < 100; i++) {
+  42:src/main.c    **** 		displayBuffer(bufferA);
+  43:src/main.c    **** 	}
+  44:src/main.c    **** 
+  45:src/main.c    **** 	LED_PORT->BSRRL = LED_P;
+  46:src/main.c    **** 
+  47:src/main.c    **** 	uint32_t* currentBuffer = bufferA;
+  48:src/main.c    **** 	uint32_t* srcBuffer = bufferA;
+  49:src/main.c    **** 	uint32_t* dstBuffer = bufferB;
+  50:src/main.c    **** 	randomizeFramebuffer(currentBuffer);
+  51:src/main.c    **** 
+  52:src/main.c    **** 	int frame = 0;
+  53:src/main.c    **** 	while (1) {
+  54:src/main.c    **** 		displayBuffer(currentBuffer);
+  55:src/main.c    **** 		birthRate  = 0;
+  56:src/main.c    **** 		int simRun = 0;
+  57:src/main.c    **** 
+  58:src/main.c    **** 		if (++frame % 5 == 0)	{
+  59:src/main.c    **** 			simRun = 1;
+  60:src/main.c    **** 			processBuffer(srcBuffer,dstBuffer);
+  61:src/main.c    **** 
+  62:src/main.c    **** 			currentBuffer = srcBuffer;
+  63:src/main.c    **** 			srcBuffer     = dstBuffer;
+  64:src/main.c    **** 			dstBuffer     = currentBuffer;
+  65:src/main.c    **** 			currentBuffer = srcBuffer;
+  66:src/main.c    **** 		}
+  67:src/main.c    **** 		if (frame % 4000 == 0 || (birthRate < 10 && simRun == 1)) {
+  68:src/main.c    **** 			randomizeFramebuffer(currentBuffer);
+  69:src/main.c    **** 			LED_PORT->ODR ^= LED_P;
+  70:src/main.c    **** 		}
+  71:src/main.c    **** 	}
+  72:src/main.c    **** }
+  73:src/main.c    **** 
+  74:src/main.c    **** /**
+  75:src/main.c    ****  * Displays the buffer on the display using binary encoding (PWM equivalent).
+  76:src/main.c    ****  */
+  77:src/main.c    **** void displayBuffer(uint32_t buffer[]) {
+  78:src/main.c    **** 	for (int s=0; s<scan; s++){
+  79:src/main.c    **** 		setRow(s);
+  80:src/main.c    **** 		int offset1 = MATRIX_WIDTH * s;
+  81:src/main.c    **** 		int offset2 = MATRIX_WIDTH * (s+scan);
+  82:src/main.c    **** 		for (int plane=0; plane < 8; plane ++) {
+  83:src/main.c    **** 			for (int x=0; x<MATRIX_WIDTH; x++) {
+  84:src/main.c    **** 				setRGB(buffer[offset1+x], buffer[offset2+x], plane);
+  85:src/main.c    **** 				CLK_TOGGLE;
+  86:src/main.c    **** 			}
+  87:src/main.c    **** 			showLine(waits[plane]);
+ARM GAS  /tmp/ccrbWbmS.s 			page 3
+
+
+  88:src/main.c    **** 		}
+  89:src/main.c    **** 	}
+  90:src/main.c    **** }
+  91:src/main.c    **** 
+  92:src/main.c    **** /**
+  93:src/main.c    ****  * generates some random junk for testing on the framebuffer.
+  94:src/main.c    ****  */
+  95:src/main.c    **** void randomizeFramebuffer(uint32_t buffer[]) {
+  29              		.loc 1 95 0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              	.LVL0:
+  34 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 24
+  37              		.cfi_offset 4, -24
+  38              		.cfi_offset 5, -20
+  39              		.cfi_offset 6, -16
+  40              		.cfi_offset 7, -12
+  41              		.cfi_offset 8, -8
+  42              		.cfi_offset 14, -4
+  43 0004 0546     		mov	r5, r0
+  44              	.LVL1:
+  45              	.LBB2:
+  96:src/main.c    **** 
+  97:src/main.c    **** 	for (int i = 0; i < MATRIX_SIZE; i++) {
+  46              		.loc 1 97 0
+  47 0006 0024     		movs	r4, #0
+  48 0008 3AE0     		b	.L2
+  49              	.LVL2:
+  50              	.L3:
+  98:src/main.c    **** 		buffer[i] = 0x00
+  99:src/main.c    **** 			| ((gammaTable[rand() % 255]) << 0)
+  51              		.loc 1 99 0 discriminator 3
+  52 000a FFF7FEFF 		bl	rand
+  53              	.LVL3:
+  54 000e 1F4E     		ldr	r6, .L5
+  55 0010 80FB0623 		smull	r2, r3, r0, r6
+  56 0014 C218     		adds	r2, r0, r3
+  57 0016 C317     		asrs	r3, r0, #31
+  58 0018 C3EBE213 		rsb	r3, r3, r2, asr #7
+  59 001c C3EB0323 		rsb	r3, r3, r3, lsl #8
+  60 0020 C31A     		subs	r3, r0, r3
+  61 0022 1B4F     		ldr	r7, .L5+4
+  62 0024 17F80380 		ldrb	r8, [r7, r3]	@ zero_extendqisi2
+ 100:src/main.c    **** 			| ((gammaTable[rand() % 255]) << 8)
+  63              		.loc 1 100 0 discriminator 3
+  64 0028 FFF7FEFF 		bl	rand
+  65              	.LVL4:
+  66 002c 80FB0623 		smull	r2, r3, r0, r6
+  67 0030 C218     		adds	r2, r0, r3
+  68 0032 C317     		asrs	r3, r0, #31
+  69 0034 C3EBE213 		rsb	r3, r3, r2, asr #7
+  70 0038 C3EB0323 		rsb	r3, r3, r3, lsl #8
+  71 003c C31A     		subs	r3, r0, r3
+  72 003e FB5C     		ldrb	r3, [r7, r3]	@ zero_extendqisi2
+ARM GAS  /tmp/ccrbWbmS.s 			page 4
+
+
+  73 0040 48EA0328 		orr	r8, r8, r3, lsl #8
+ 101:src/main.c    **** 			| ((gammaTable[rand() % 255]) << 16)
+  74              		.loc 1 101 0 discriminator 3
+  75 0044 FFF7FEFF 		bl	rand
+  76              	.LVL5:
+  77 0048 80FB0623 		smull	r2, r3, r0, r6
+  78 004c C218     		adds	r2, r0, r3
+  79 004e C317     		asrs	r3, r0, #31
+  80 0050 C3EBE213 		rsb	r3, r3, r2, asr #7
+  81 0054 C3EB0323 		rsb	r3, r3, r3, lsl #8
+  82 0058 C31A     		subs	r3, r0, r3
+  83 005a FF5C     		ldrb	r7, [r7, r3]	@ zero_extendqisi2
+  84 005c 48EA0747 		orr	r7, r8, r7, lsl #16
+ 102:src/main.c    **** 			| ((rand() % 255) << 24);
+  85              		.loc 1 102 0 discriminator 3
+  86 0060 FFF7FEFF 		bl	rand
+  87              	.LVL6:
+  88 0064 80FB0623 		smull	r2, r3, r0, r6
+  89 0068 0344     		add	r3, r3, r0
+  90 006a C217     		asrs	r2, r0, #31
+  91 006c C2EBE313 		rsb	r3, r2, r3, asr #7
+  92 0070 C3EB0323 		rsb	r3, r3, r3, lsl #8
+  93 0074 C31A     		subs	r3, r0, r3
+  94 0076 47EA0363 		orr	r3, r7, r3, lsl #24
+  98:src/main.c    **** 			| ((gammaTable[rand() % 255]) << 0)
+  95              		.loc 1 98 0 discriminator 3
+  96 007a 45F82430 		str	r3, [r5, r4, lsl #2]
+  97:src/main.c    **** 		buffer[i] = 0x00
+  97              		.loc 1 97 0 discriminator 3
+  98 007e 0134     		adds	r4, r4, #1
+  99              	.LVL7:
+ 100              	.L2:
+  97:src/main.c    **** 		buffer[i] = 0x00
+ 101              		.loc 1 97 0 is_stmt 0 discriminator 1
+ 102 0080 B4F5806F 		cmp	r4, #1024
+ 103 0084 C1DB     		blt	.L3
+ 104              	.LBE2:
+ 103:src/main.c    **** 	}
+ 104:src/main.c    **** }
+ 105              		.loc 1 104 0 is_stmt 1
+ 106 0086 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 107              	.LVL8:
+ 108              	.L6:
+ 109 008a 00BF     		.align	2
+ 110              	.L5:
+ 111 008c 81808080 		.word	-2139062143
+ 112 0090 00000000 		.word	gammaTable
+ 113              		.cfi_endproc
+ 114              	.LFE125:
+ 116              		.section	.text.setRow,"ax",%progbits
+ 117              		.align	2
+ 118              		.global	setRow
+ 119              		.thumb
+ 120              		.thumb_func
+ 122              	setRow:
+ 123              	.LFB126:
+ 105:src/main.c    **** 
+ARM GAS  /tmp/ccrbWbmS.s 			page 5
+
+
+ 106:src/main.c    **** 
+ 107:src/main.c    **** /**
+ 108:src/main.c    ****  * sets the row on the row gpio ports
+ 109:src/main.c    ****  */
+ 110:src/main.c    **** void setRow(int row) {
+ 124              		.loc 1 110 0
+ 125              		.cfi_startproc
+ 126              		@ args = 0, pretend = 0, frame = 0
+ 127              		@ frame_needed = 0, uses_anonymous_args = 0
+ 128              		@ link register save eliminated.
+ 129              	.LVL9:
+ 111:src/main.c    **** 	// todo: perhaps a lookup table could give us a tiny boost here.
+ 112:src/main.c    **** 	if (row & 0b0001) MTX_PORT->BSRRL = MTX_PA;
+ 130              		.loc 1 112 0
+ 131 0000 10F0010F 		tst	r0, #1
+ 132 0004 04D0     		beq	.L8
+ 133              		.loc 1 112 0 is_stmt 0 discriminator 1
+ 134 0006 4FF48052 		mov	r2, #4096
+ 135 000a 164B     		ldr	r3, .L16
+ 136 000c 1A83     		strh	r2, [r3, #24]	@ movhi
+ 137 000e 03E0     		b	.L9
+ 138              	.L8:
+ 113:src/main.c    **** 	else MTX_PORT->BSRRH = MTX_PA;
+ 139              		.loc 1 113 0 is_stmt 1
+ 140 0010 4FF48052 		mov	r2, #4096
+ 141 0014 134B     		ldr	r3, .L16
+ 142 0016 5A83     		strh	r2, [r3, #26]	@ movhi
+ 143              	.L9:
+ 114:src/main.c    **** 
+ 115:src/main.c    **** 	if (row & 0b0010) MTX_PORT->BSRRL = MTX_PB;
+ 144              		.loc 1 115 0
+ 145 0018 10F0020F 		tst	r0, #2
+ 146 001c 04D0     		beq	.L10
+ 147              		.loc 1 115 0 is_stmt 0 discriminator 1
+ 148 001e 4FF40052 		mov	r2, #8192
+ 149 0022 104B     		ldr	r3, .L16
+ 150 0024 1A83     		strh	r2, [r3, #24]	@ movhi
+ 151 0026 03E0     		b	.L11
+ 152              	.L10:
+ 116:src/main.c    **** 	else MTX_PORT->BSRRH = MTX_PB;
+ 153              		.loc 1 116 0 is_stmt 1
+ 154 0028 4FF40052 		mov	r2, #8192
+ 155 002c 0D4B     		ldr	r3, .L16
+ 156 002e 5A83     		strh	r2, [r3, #26]	@ movhi
+ 157              	.L11:
+ 117:src/main.c    **** 
+ 118:src/main.c    **** 	if (row & 0b0100) MTX_PORT->BSRRL = MTX_PC;
+ 158              		.loc 1 118 0
+ 159 0030 10F0040F 		tst	r0, #4
+ 160 0034 04D0     		beq	.L12
+ 161              		.loc 1 118 0 is_stmt 0 discriminator 1
+ 162 0036 4FF48042 		mov	r2, #16384
+ 163 003a 0A4B     		ldr	r3, .L16
+ 164 003c 1A83     		strh	r2, [r3, #24]	@ movhi
+ 165 003e 03E0     		b	.L13
+ 166              	.L12:
+ 119:src/main.c    **** 	else MTX_PORT->BSRRH = MTX_PC;
+ARM GAS  /tmp/ccrbWbmS.s 			page 6
+
+
+ 167              		.loc 1 119 0 is_stmt 1
+ 168 0040 4FF48042 		mov	r2, #16384
+ 169 0044 074B     		ldr	r3, .L16
+ 170 0046 5A83     		strh	r2, [r3, #26]	@ movhi
+ 171              	.L13:
+ 120:src/main.c    **** 
+ 121:src/main.c    **** 	if (row & 0b1000) MTX_PORT->BSRRL = MTX_PD;
+ 172              		.loc 1 121 0
+ 173 0048 10F0080F 		tst	r0, #8
+ 174 004c 04D0     		beq	.L14
+ 175              		.loc 1 121 0 is_stmt 0 discriminator 1
+ 176 004e 4FF40042 		mov	r2, #32768
+ 177 0052 044B     		ldr	r3, .L16
+ 178 0054 1A83     		strh	r2, [r3, #24]	@ movhi
+ 179 0056 7047     		bx	lr
+ 180              	.L14:
+ 122:src/main.c    **** 	else MTX_PORT->BSRRH = MTX_PD;
+ 181              		.loc 1 122 0 is_stmt 1
+ 182 0058 4FF40042 		mov	r2, #32768
+ 183 005c 014B     		ldr	r3, .L16
+ 184 005e 5A83     		strh	r2, [r3, #26]	@ movhi
+ 185 0060 7047     		bx	lr
+ 186              	.L17:
+ 187 0062 00BF     		.align	2
+ 188              	.L16:
+ 189 0064 00040240 		.word	1073873920
+ 190              		.cfi_endproc
+ 191              	.LFE126:
+ 193              		.section	.text.setRGB,"ax",%progbits
+ 194              		.align	2
+ 195              		.global	setRGB
+ 196              		.thumb
+ 197              		.thumb_func
+ 199              	setRGB:
+ 200              	.LFB127:
+ 123:src/main.c    **** }
+ 124:src/main.c    **** 
+ 125:src/main.c    **** /**
+ 126:src/main.c    ****  * loads rgb1 and rgb2 gpio ports with the given bitplane
+ 127:src/main.c    ****  */
+ 128:src/main.c    **** void setRGB(uint32_t rgb1, uint32_t rgb2, uint8_t plane) {
+ 201              		.loc 1 128 0
+ 202              		.cfi_startproc
+ 203              		@ args = 0, pretend = 0, frame = 0
+ 204              		@ frame_needed = 0, uses_anonymous_args = 0
+ 205              		@ link register save eliminated.
+ 206              	.LVL10:
+ 207 0000 70B4     		push	{r4, r5, r6}
+ 208              	.LCFI1:
+ 209              		.cfi_def_cfa_offset 12
+ 210              		.cfi_offset 4, -12
+ 211              		.cfi_offset 5, -8
+ 212              		.cfi_offset 6, -4
+ 129:src/main.c    **** 	// using bitshifting seems to be faster due to gcc optimization
+ 130:src/main.c    **** 	// than using a bitmask lookup table here.
+ 131:src/main.c    **** 
+ 132:src/main.c    **** 	if (rgb1 & (1 << plane))        MTX_PORT->BSRRL = MTX_PR0;
+ARM GAS  /tmp/ccrbWbmS.s 			page 7
+
+
+ 213              		.loc 1 132 0
+ 214 0002 0125     		movs	r5, #1
+ 215 0004 9540     		lsls	r5, r5, r2
+ 216 0006 0542     		tst	r5, r0
+ 217 0008 03D0     		beq	.L19
+ 218              		.loc 1 132 0 is_stmt 0 discriminator 1
+ 219 000a 0824     		movs	r4, #8
+ 220 000c 1E4B     		ldr	r3, .L32
+ 221 000e 1C83     		strh	r4, [r3, #24]	@ movhi
+ 222 0010 02E0     		b	.L20
+ 223              	.L19:
+ 133:src/main.c    **** 	else                            MTX_PORT->BSRRH  = MTX_PR0;
+ 224              		.loc 1 133 0 is_stmt 1
+ 225 0012 0824     		movs	r4, #8
+ 226 0014 1C4B     		ldr	r3, .L32
+ 227 0016 5C83     		strh	r4, [r3, #26]	@ movhi
+ 228              	.L20:
+ 134:src/main.c    **** 
+ 135:src/main.c    **** 	if (rgb1 & (1 << (plane + 8))) 	MTX_PORT->BSRRL = MTX_PG0;
+ 229              		.loc 1 135 0
+ 230 0018 02F10803 		add	r3, r2, #8
+ 231 001c 0124     		movs	r4, #1
+ 232 001e 9C40     		lsls	r4, r4, r3
+ 233 0020 0442     		tst	r4, r0
+ 234 0022 03D0     		beq	.L21
+ 235              		.loc 1 135 0 is_stmt 0 discriminator 1
+ 236 0024 1026     		movs	r6, #16
+ 237 0026 184B     		ldr	r3, .L32
+ 238 0028 1E83     		strh	r6, [r3, #24]	@ movhi
+ 239 002a 02E0     		b	.L22
+ 240              	.L21:
+ 136:src/main.c    **** 	else                            MTX_PORT->BSRRH  = MTX_PG0;
+ 241              		.loc 1 136 0 is_stmt 1
+ 242 002c 1026     		movs	r6, #16
+ 243 002e 164B     		ldr	r3, .L32
+ 244 0030 5E83     		strh	r6, [r3, #26]	@ movhi
+ 245              	.L22:
+ 137:src/main.c    **** 
+ 138:src/main.c    **** 	if (rgb1 & (1 << (plane + 16))) MTX_PORT->BSRRL = MTX_PB0;
+ 246              		.loc 1 138 0
+ 247 0032 1032     		adds	r2, r2, #16
+ 248              	.LVL11:
+ 249 0034 0123     		movs	r3, #1
+ 250 0036 9340     		lsls	r3, r3, r2
+ 251 0038 0342     		tst	r3, r0
+ 252 003a 03D0     		beq	.L23
+ 253              		.loc 1 138 0 is_stmt 0 discriminator 1
+ 254 003c 2020     		movs	r0, #32
+ 255              	.LVL12:
+ 256 003e 124A     		ldr	r2, .L32
+ 257 0040 1083     		strh	r0, [r2, #24]	@ movhi
+ 258 0042 02E0     		b	.L24
+ 259              	.LVL13:
+ 260              	.L23:
+ 139:src/main.c    **** 	else                            MTX_PORT->BSRRH  = MTX_PB0;
+ 261              		.loc 1 139 0 is_stmt 1
+ 262 0044 2020     		movs	r0, #32
+ARM GAS  /tmp/ccrbWbmS.s 			page 8
+
+
+ 263              	.LVL14:
+ 264 0046 104A     		ldr	r2, .L32
+ 265 0048 5083     		strh	r0, [r2, #26]	@ movhi
+ 266              	.L24:
+ 140:src/main.c    **** 
+ 141:src/main.c    **** 	if (rgb2 & (1 << plane))        MTX_PORT->BSRRL = MTX_PR1;
+ 267              		.loc 1 141 0
+ 268 004a 0D42     		tst	r5, r1
+ 269 004c 03D0     		beq	.L25
+ 270              		.loc 1 141 0 is_stmt 0 discriminator 1
+ 271 004e 4020     		movs	r0, #64
+ 272 0050 0D4A     		ldr	r2, .L32
+ 273 0052 1083     		strh	r0, [r2, #24]	@ movhi
+ 274 0054 02E0     		b	.L26
+ 275              	.L25:
+ 142:src/main.c    **** 	else                            MTX_PORT->BSRRH  = MTX_PR1;
+ 276              		.loc 1 142 0 is_stmt 1
+ 277 0056 4020     		movs	r0, #64
+ 278 0058 0B4A     		ldr	r2, .L32
+ 279 005a 5083     		strh	r0, [r2, #26]	@ movhi
+ 280              	.L26:
+ 143:src/main.c    **** 
+ 144:src/main.c    **** 	if (rgb2 & (1 << (plane + 8))) 	MTX_PORT->BSRRL = MTX_PG1;
+ 281              		.loc 1 144 0
+ 282 005c 0C42     		tst	r4, r1
+ 283 005e 03D0     		beq	.L27
+ 284              		.loc 1 144 0 is_stmt 0 discriminator 1
+ 285 0060 8020     		movs	r0, #128
+ 286 0062 094A     		ldr	r2, .L32
+ 287 0064 1083     		strh	r0, [r2, #24]	@ movhi
+ 288 0066 02E0     		b	.L28
+ 289              	.L27:
+ 145:src/main.c    **** 	else                            MTX_PORT->BSRRH  = MTX_PG1;
+ 290              		.loc 1 145 0 is_stmt 1
+ 291 0068 8020     		movs	r0, #128
+ 292 006a 074A     		ldr	r2, .L32
+ 293 006c 5083     		strh	r0, [r2, #26]	@ movhi
+ 294              	.L28:
+ 146:src/main.c    **** 
+ 147:src/main.c    **** 	if (rgb2 & (1 << (plane + 16))) MTX_PORT->BSRRL = MTX_PB1;
+ 295              		.loc 1 147 0
+ 296 006e 0B42     		tst	r3, r1
+ 297 0070 04D0     		beq	.L29
+ 298              		.loc 1 147 0 is_stmt 0 discriminator 1
+ 299 0072 4FF48072 		mov	r2, #256
+ 300 0076 044B     		ldr	r3, .L32
+ 301 0078 1A83     		strh	r2, [r3, #24]	@ movhi
+ 302 007a 03E0     		b	.L18
+ 303              	.L29:
+ 148:src/main.c    **** 	else                            MTX_PORT->BSRRH  = MTX_PB1;
+ 304              		.loc 1 148 0 is_stmt 1
+ 305 007c 4FF48072 		mov	r2, #256
+ 306 0080 014B     		ldr	r3, .L32
+ 307 0082 5A83     		strh	r2, [r3, #26]	@ movhi
+ 308              	.L18:
+ 149:src/main.c    **** }
+ 309              		.loc 1 149 0
+ARM GAS  /tmp/ccrbWbmS.s 			page 9
+
+
+ 310 0084 70BC     		pop	{r4, r5, r6}
+ 311              	.LCFI2:
+ 312              		.cfi_restore 6
+ 313              		.cfi_restore 5
+ 314              		.cfi_restore 4
+ 315              		.cfi_def_cfa_offset 0
+ 316 0086 7047     		bx	lr
+ 317              	.L33:
+ 318              		.align	2
+ 319              	.L32:
+ 320 0088 00040240 		.word	1073873920
+ 321              		.cfi_endproc
+ 322              	.LFE127:
+ 324              		.section	.text.showLine,"ax",%progbits
+ 325              		.align	2
+ 326              		.global	showLine
+ 327              		.thumb
+ 328              		.thumb_func
+ 330              	showLine:
+ 331              	.LFB128:
+ 150:src/main.c    **** 
+ 151:src/main.c    **** 
+ 152:src/main.c    **** /**
+ 153:src/main.c    ****  * strobes / shows a line for a n*nop amount of time.
+ 154:src/main.c    ****  */
+ 155:src/main.c    **** void showLine(int amount) {
+ 332              		.loc 1 155 0
+ 333              		.cfi_startproc
+ 334              		@ args = 0, pretend = 0, frame = 0
+ 335              		@ frame_needed = 0, uses_anonymous_args = 0
+ 336              	.LVL15:
+ 337 0000 38B5     		push	{r3, r4, r5, lr}
+ 338              	.LCFI3:
+ 339              		.cfi_def_cfa_offset 16
+ 340              		.cfi_offset 3, -16
+ 341              		.cfi_offset 4, -12
+ 342              		.cfi_offset 5, -8
+ 343              		.cfi_offset 14, -4
+ 344 0002 0546     		mov	r5, r0
+ 156:src/main.c    **** 	STROBE;
+ 345              		.loc 1 156 0
+ 346 0004 084B     		ldr	r3, .L38
+ 347 0006 0122     		movs	r2, #1
+ 348 0008 1A83     		strh	r2, [r3, #24]	@ movhi
+ 349 000a 5A83     		strh	r2, [r3, #26]	@ movhi
+ 157:src/main.c    **** 	DISP_ON;
+ 350              		.loc 1 157 0
+ 351 000c 0222     		movs	r2, #2
+ 352 000e 5A83     		strh	r2, [r3, #26]	@ movhi
+ 353              	.LVL16:
+ 354              	.LBB3:
+ 158:src/main.c    **** 	for (int c=0; c<amount; c++) asm("nop");
+ 355              		.loc 1 158 0
+ 356 0010 0024     		movs	r4, #0
+ 357 0012 03E0     		b	.L35
+ 358              	.LVL17:
+ 359              	.L36:
+ARM GAS  /tmp/ccrbWbmS.s 			page 10
+
+
+ 360              	.LBB4:
+ 361              		.loc 1 158 0 is_stmt 0 discriminator 3
+ 362 0014 0548     		ldr	r0, .L38+4
+ 363 0016 FFF7FEFF 		bl	asm
+ 364              	.LVL18:
+ 365              	.LBE4:
+ 366 001a 0134     		adds	r4, r4, #1
+ 367              	.LVL19:
+ 368              	.L35:
+ 369              		.loc 1 158 0 discriminator 1
+ 370 001c AC42     		cmp	r4, r5
+ 371 001e F9DB     		blt	.L36
+ 372              	.LBE3:
+ 159:src/main.c    **** 	DISP_OFF;
+ 373              		.loc 1 159 0 is_stmt 1
+ 374 0020 0222     		movs	r2, #2
+ 375 0022 014B     		ldr	r3, .L38
+ 376 0024 1A83     		strh	r2, [r3, #24]	@ movhi
+ 377 0026 38BD     		pop	{r3, r4, r5, pc}
+ 378              	.LVL20:
+ 379              	.L39:
+ 380              		.align	2
+ 381              	.L38:
+ 382 0028 00040240 		.word	1073873920
+ 383 002c 00000000 		.word	.LC0
+ 384              		.cfi_endproc
+ 385              	.LFE128:
+ 387              		.section	.text.displayBuffer,"ax",%progbits
+ 388              		.align	2
+ 389              		.global	displayBuffer
+ 390              		.thumb
+ 391              		.thumb_func
+ 393              	displayBuffer:
+ 394              	.LFB124:
+  77:src/main.c    **** 	for (int s=0; s<scan; s++){
+ 395              		.loc 1 77 0
+ 396              		.cfi_startproc
+ 397              		@ args = 0, pretend = 0, frame = 0
+ 398              		@ frame_needed = 0, uses_anonymous_args = 0
+ 399              	.LVL21:
+ 400 0000 2DE9F843 		push	{r3, r4, r5, r6, r7, r8, r9, lr}
+ 401              	.LCFI4:
+ 402              		.cfi_def_cfa_offset 32
+ 403              		.cfi_offset 3, -32
+ 404              		.cfi_offset 4, -28
+ 405              		.cfi_offset 5, -24
+ 406              		.cfi_offset 6, -20
+ 407              		.cfi_offset 7, -16
+ 408              		.cfi_offset 8, -12
+ 409              		.cfi_offset 9, -8
+ 410              		.cfi_offset 14, -4
+ 411 0004 0546     		mov	r5, r0
+ 412              	.LVL22:
+ 413              	.LBB5:
+  78:src/main.c    **** 		setRow(s);
+ 414              		.loc 1 78 0
+ 415 0006 4FF00009 		mov	r9, #0
+ARM GAS  /tmp/ccrbWbmS.s 			page 11
+
+
+ 416 000a 27E0     		b	.L41
+ 417              	.LVL23:
+ 418              	.L45:
+ 419              	.LBB6:
+  79:src/main.c    **** 		int offset1 = MATRIX_WIDTH * s;
+ 420              		.loc 1 79 0
+ 421 000c 4846     		mov	r0, r9
+ 422 000e FFF7FEFF 		bl	setRow
+ 423              	.LVL24:
+  80:src/main.c    **** 		int offset2 = MATRIX_WIDTH * (s+scan);
+ 424              		.loc 1 80 0
+ 425 0012 4FEA4918 		lsl	r8, r9, #5
+ 426              	.LVL25:
+  81:src/main.c    **** 		for (int plane=0; plane < 8; plane ++) {
+ 427              		.loc 1 81 0
+ 428 0016 09F11007 		add	r7, r9, #16
+ 429 001a 7F01     		lsls	r7, r7, #5
+ 430              	.LVL26:
+ 431              	.LBB7:
+  82:src/main.c    **** 			for (int x=0; x<MATRIX_WIDTH; x++) {
+ 432              		.loc 1 82 0
+ 433 001c 0026     		movs	r6, #0
+ 434 001e 19E0     		b	.L42
+ 435              	.LVL27:
+ 436              	.L43:
+ 437              	.LBB8:
+  84:src/main.c    **** 				CLK_TOGGLE;
+ 438              		.loc 1 84 0 discriminator 3
+ 439 0020 08EB0402 		add	r2, r8, r4
+ 440 0024 3B19     		adds	r3, r7, r4
+ 441 0026 55F82200 		ldr	r0, [r5, r2, lsl #2]
+ 442 002a 55F82310 		ldr	r1, [r5, r3, lsl #2]
+ 443 002e F2B2     		uxtb	r2, r6
+ 444 0030 FFF7FEFF 		bl	setRGB
+ 445              	.LVL28:
+  85:src/main.c    **** 			}
+ 446              		.loc 1 85 0 discriminator 3
+ 447 0034 0C4B     		ldr	r3, .L48
+ 448 0036 4FF40072 		mov	r2, #512
+ 449 003a 1A83     		strh	r2, [r3, #24]	@ movhi
+ 450 003c 5A83     		strh	r2, [r3, #26]	@ movhi
+  83:src/main.c    **** 				setRGB(buffer[offset1+x], buffer[offset2+x], plane);
+ 451              		.loc 1 83 0 discriminator 3
+ 452 003e 0134     		adds	r4, r4, #1
+ 453              	.LVL29:
+ 454 0040 00E0     		b	.L44
+ 455              	.LVL30:
+ 456              	.L46:
+ 457              	.LBE8:
+ 458 0042 0024     		movs	r4, #0
+ 459              	.L44:
+ 460              	.LVL31:
+ 461              	.LBB9:
+  83:src/main.c    **** 				setRGB(buffer[offset1+x], buffer[offset2+x], plane);
+ 462              		.loc 1 83 0 is_stmt 0 discriminator 1
+ 463 0044 1F2C     		cmp	r4, #31
+ 464 0046 EBDD     		ble	.L43
+ARM GAS  /tmp/ccrbWbmS.s 			page 12
+
+
+ 465              	.LBE9:
+  87:src/main.c    **** 		}
+ 466              		.loc 1 87 0 is_stmt 1 discriminator 2
+ 467 0048 084B     		ldr	r3, .L48+4
+ 468 004a 53F82600 		ldr	r0, [r3, r6, lsl #2]
+ 469 004e FFF7FEFF 		bl	showLine
+ 470              	.LVL32:
+  82:src/main.c    **** 			for (int x=0; x<MATRIX_WIDTH; x++) {
+ 471              		.loc 1 82 0 discriminator 2
+ 472 0052 0136     		adds	r6, r6, #1
+ 473              	.LVL33:
+ 474              	.L42:
+  82:src/main.c    **** 			for (int x=0; x<MATRIX_WIDTH; x++) {
+ 475              		.loc 1 82 0 is_stmt 0 discriminator 1
+ 476 0054 072E     		cmp	r6, #7
+ 477 0056 F4DD     		ble	.L46
+ 478              	.LBE7:
+ 479              	.LBE6:
+  78:src/main.c    **** 		setRow(s);
+ 480              		.loc 1 78 0 is_stmt 1 discriminator 2
+ 481 0058 09F10109 		add	r9, r9, #1
+ 482              	.LVL34:
+ 483              	.L41:
+  78:src/main.c    **** 		setRow(s);
+ 484              		.loc 1 78 0 is_stmt 0 discriminator 1
+ 485 005c B9F10F0F 		cmp	r9, #15
+ 486 0060 D4DD     		ble	.L45
+ 487              	.LBE5:
+  90:src/main.c    **** 
+ 488              		.loc 1 90 0 is_stmt 1
+ 489 0062 BDE8F883 		pop	{r3, r4, r5, r6, r7, r8, r9, pc}
+ 490              	.LVL35:
+ 491              	.L49:
+ 492 0066 00BF     		.align	2
+ 493              	.L48:
+ 494 0068 00040240 		.word	1073873920
+ 495 006c 00000000 		.word	.LANCHOR0
+ 496              		.cfi_endproc
+ 497              	.LFE124:
+ 499              		.section	.text.analyzeCell,"ax",%progbits
+ 500              		.align	2
+ 501              		.global	analyzeCell
+ 502              		.thumb
+ 503              		.thumb_func
+ 505              	analyzeCell:
+ 506              	.LFB130:
+ 160:src/main.c    **** }
+ 161:src/main.c    **** 
+ 162:src/main.c    **** void processBuffer(uint32_t src[], uint32_t dst[]){
+ 163:src/main.c    **** 	// apply GOF rules on src and store result in dst.
+ 164:src/main.c    **** 	for (int i=0; i<MATRIX_SIZE; i++){
+ 165:src/main.c    **** 		CellAction action = analyzeCell(i,src);
+ 166:src/main.c    **** 		if (COPY == action ){
+ 167:src/main.c    **** 			dst[i] = src[i];
+ 168:src/main.c    **** 		}
+ 169:src/main.c    **** 		else if (NEW == action ){
+ 170:src/main.c    **** 			dst[i] = ((gammaTable[rand() % 255]) << 0) | ((gammaTable[rand() % 255]) << 8) | ((gammaTable[ra
+ARM GAS  /tmp/ccrbWbmS.s 			page 13
+
+
+ 171:src/main.c    **** 			birthRate++;
+ 172:src/main.c    **** 		}
+ 173:src/main.c    **** 		else if (KILL == action ){
+ 174:src/main.c    **** 			dst[i] = 0x00ffffff & src[i];
+ 175:src/main.c    **** 		}
+ 176:src/main.c    **** 	}
+ 177:src/main.c    **** 
+ 178:src/main.c    **** 	// fade out dead cells
+ 179:src/main.c    **** 	for (int i=0; i<MATRIX_SIZE; i++){
+ 180:src/main.c    **** 		if (! (0x01000000 & dst[i]) ){
+ 181:src/main.c    **** 			dst[i] =  (((dst[i]       & 0x000000ff) >> 1))       |
+ 182:src/main.c    **** 	              (((dst[i] >> 8  & 0x000000ff) >> 1) << 8)  |
+ 183:src/main.c    **** 	              (((dst[i] >> 16 & 0x000000ff) >> 1) << 16);
+ 184:src/main.c    **** 		}
+ 185:src/main.c    **** 	}
+ 186:src/main.c    **** }
+ 187:src/main.c    **** 
+ 188:src/main.c    **** CellAction analyzeCell(int offset, uint32_t buffer[]){
+ 507              		.loc 1 188 0
+ 508              		.cfi_startproc
+ 509              		@ args = 0, pretend = 0, frame = 0
+ 510              		@ frame_needed = 0, uses_anonymous_args = 0
+ 511              		@ link register save eliminated.
+ 512              	.LVL36:
+ 189:src/main.c    **** 	// skip the first row, first column, last column and last row to make alive neighbor
+ 190:src/main.c    **** 	// detection easier.
+ 191:src/main.c    **** 	if ( ( offset    < MATRIX_WIDTH) ||
+ 513              		.loc 1 191 0
+ 514 0000 A0F12003 		sub	r3, r0, #32
+ 515 0004 B3F5707F 		cmp	r3, #960
+ 516 0008 63D8     		bhi	.L65
+ 192:src/main.c    **** 	     ( offset    > MATRIX_SIZE - MATRIX_WIDTH ) ||
+ 517              		.loc 1 192 0
+ 518 000a 10F01F0F 		tst	r0, #31
+ 519 000e 62D0     		beq	.L66
+ 193:src/main.c    **** 	     ( offset    % MATRIX_WIDTH == 0) ||
+ 194:src/main.c    **** 	     ((offset+1) % MATRIX_WIDTH == 0)) return KILL;
+ 520              		.loc 1 194 0
+ 521 0010 431C     		adds	r3, r0, #1
+ 193:src/main.c    **** 	     ( offset    % MATRIX_WIDTH == 0) ||
+ 522              		.loc 1 193 0
+ 523 0012 13F01F0F 		tst	r3, #31
+ 524 0016 60D0     		beq	.L67
+ 188:src/main.c    **** 	// skip the first row, first column, last column and last row to make alive neighbor
+ 525              		.loc 1 188 0
+ 526 0018 30B4     		push	{r4, r5}
+ 527              	.LCFI5:
+ 528              		.cfi_def_cfa_offset 8
+ 529              		.cfi_offset 4, -8
+ 530              		.cfi_offset 5, -4
+ 531              	.LVL37:
+ 195:src/main.c    **** 
+ 196:src/main.c    **** 	int neighbors = 0;
+ 197:src/main.c    **** 	int alive = buffer[offset] & 0x01000000;
+ 532              		.loc 1 197 0
+ 533 001a 51F82040 		ldr	r4, [r1, r0, lsl #2]
+ 534 001e 04F08074 		and	r4, r4, #16777216
+ARM GAS  /tmp/ccrbWbmS.s 			page 14
+
+
+ 535              	.LVL38:
+ 198:src/main.c    **** 
+ 199:src/main.c    **** 	if (buffer[offset-1] & 0x1000000) neighbors ++;
+ 536              		.loc 1 199 0
+ 537 0022 00F18043 		add	r3, r0, #1073741824
+ 538 0026 013B     		subs	r3, r3, #1
+ 539 0028 51F82330 		ldr	r3, [r1, r3, lsl #2]
+ 540 002c 13F0807F 		tst	r3, #16777216
+ 541 0030 01D1     		bne	.L68
+ 196:src/main.c    **** 	int alive = buffer[offset] & 0x01000000;
+ 542              		.loc 1 196 0
+ 543 0032 0023     		movs	r3, #0
+ 544 0034 00E0     		b	.L52
+ 545              	.L68:
+ 546              		.loc 1 199 0
+ 547 0036 0123     		movs	r3, #1
+ 548              	.L52:
+ 549              	.LVL39:
+ 200:src/main.c    **** 	if (buffer[offset+1] & 0x1000000) neighbors ++;
+ 550              		.loc 1 200 0
+ 551 0038 421C     		adds	r2, r0, #1
+ 552 003a 51F82220 		ldr	r2, [r1, r2, lsl #2]
+ 553 003e 12F0807F 		tst	r2, #16777216
+ 554 0042 00D0     		beq	.L53
+ 555              		.loc 1 200 0 is_stmt 0 discriminator 1
+ 556 0044 0133     		adds	r3, r3, #1
+ 557              	.LVL40:
+ 558              	.L53:
+ 201:src/main.c    **** 
+ 202:src/main.c    **** 	offset -= MATRIX_WIDTH;
+ 559              		.loc 1 202 0 is_stmt 1
+ 560 0046 A0F12002 		sub	r2, r0, #32
+ 561              	.LVL41:
+ 203:src/main.c    **** 	if (buffer[offset-1] & 0x1000000) neighbors ++;
+ 562              		.loc 1 203 0
+ 563 004a 02F18045 		add	r5, r2, #1073741824
+ 564 004e 013D     		subs	r5, r5, #1
+ 565 0050 51F82550 		ldr	r5, [r1, r5, lsl #2]
+ 566 0054 15F0807F 		tst	r5, #16777216
+ 567 0058 00D0     		beq	.L54
+ 568              		.loc 1 203 0 is_stmt 0 discriminator 1
+ 569 005a 0133     		adds	r3, r3, #1
+ 570              	.LVL42:
+ 571              	.L54:
+ 204:src/main.c    **** 	if (buffer[offset]   & 0x1000000) neighbors ++;
+ 572              		.loc 1 204 0 is_stmt 1
+ 573 005c 51F82250 		ldr	r5, [r1, r2, lsl #2]
+ 574 0060 15F0807F 		tst	r5, #16777216
+ 575 0064 00D0     		beq	.L55
+ 576              		.loc 1 204 0 is_stmt 0 discriminator 1
+ 577 0066 0133     		adds	r3, r3, #1
+ 578              	.LVL43:
+ 579              	.L55:
+ 205:src/main.c    **** 	if (buffer[offset+1] & 0x1000000) neighbors ++;
+ 580              		.loc 1 205 0 is_stmt 1
+ 581 0068 0132     		adds	r2, r2, #1
+ 582 006a 51F82220 		ldr	r2, [r1, r2, lsl #2]
+ARM GAS  /tmp/ccrbWbmS.s 			page 15
+
+
+ 583 006e 12F0807F 		tst	r2, #16777216
+ 584 0072 00D0     		beq	.L56
+ 585              		.loc 1 205 0 is_stmt 0 discriminator 1
+ 586 0074 0133     		adds	r3, r3, #1
+ 587              	.LVL44:
+ 588              	.L56:
+ 206:src/main.c    **** 
+ 207:src/main.c    **** 	offset += MATRIX_WIDTH*2;
+ 589              		.loc 1 207 0 is_stmt 1
+ 590 0076 2030     		adds	r0, r0, #32
+ 208:src/main.c    **** 	if (buffer[offset-1] & 0x1000000) neighbors ++;
+ 591              		.loc 1 208 0
+ 592 0078 00F18042 		add	r2, r0, #1073741824
+ 593 007c 013A     		subs	r2, r2, #1
+ 594 007e 51F82220 		ldr	r2, [r1, r2, lsl #2]
+ 595 0082 12F0807F 		tst	r2, #16777216
+ 596 0086 00D0     		beq	.L57
+ 597              		.loc 1 208 0 is_stmt 0 discriminator 1
+ 598 0088 0133     		adds	r3, r3, #1
+ 599              	.LVL45:
+ 600              	.L57:
+ 209:src/main.c    **** 	if (buffer[offset]   & 0x1000000) neighbors ++;
+ 601              		.loc 1 209 0 is_stmt 1
+ 602 008a 51F82020 		ldr	r2, [r1, r0, lsl #2]
+ 603 008e 12F0807F 		tst	r2, #16777216
+ 604 0092 00D0     		beq	.L58
+ 605              		.loc 1 209 0 is_stmt 0 discriminator 1
+ 606 0094 0133     		adds	r3, r3, #1
+ 607              	.LVL46:
+ 608              	.L58:
+ 210:src/main.c    **** 	if (buffer[offset+1] & 0x1000000) neighbors ++;
+ 609              		.loc 1 210 0 is_stmt 1
+ 610 0096 0130     		adds	r0, r0, #1
+ 611 0098 51F82020 		ldr	r2, [r1, r0, lsl #2]
+ 612 009c 12F0807F 		tst	r2, #16777216
+ 613 00a0 00D0     		beq	.L59
+ 614              		.loc 1 210 0 is_stmt 0 discriminator 1
+ 615 00a2 0133     		adds	r3, r3, #1
+ 616              	.LVL47:
+ 617              	.L59:
+ 211:src/main.c    **** 
+ 212:src/main.c    **** 	return (neighbors < 2) ? KILL :
+ 618              		.loc 1 212 0 is_stmt 1
+ 619 00a4 012B     		cmp	r3, #1
+ 620 00a6 12DD     		ble	.L69
+ 621              		.loc 1 212 0 is_stmt 0 discriminator 1
+ 622 00a8 14B1     		cbz	r4, .L61
+ 213:src/main.c    **** 	       (alive && (neighbors == 2 || neighbors == 3)) ? COPY :
+ 623              		.loc 1 213 0 is_stmt 1
+ 624 00aa 9A1E     		subs	r2, r3, #2
+ 625 00ac 012A     		cmp	r2, #1
+ 626 00ae 0CD9     		bls	.L70
+ 627              	.L61:
+ 212:src/main.c    **** 	       (alive && (neighbors == 2 || neighbors == 3)) ? COPY :
+ 628              		.loc 1 212 0 discriminator 3
+ 629 00b0 032B     		cmp	r3, #3
+ 630 00b2 08DC     		bgt	.L71
+ARM GAS  /tmp/ccrbWbmS.s 			page 16
+
+
+ 212:src/main.c    **** 	       (alive && (neighbors == 2 || neighbors == 3)) ? COPY :
+ 631              		.loc 1 212 0 is_stmt 0 discriminator 4
+ 632 00b4 1CB9     		cbnz	r4, .L72
+ 214:src/main.c    **** 	       (neighbors > 3) ? KILL :
+ 215:src/main.c    **** 	       (!alive && neighbors == 3) ? NEW :
+ 633              		.loc 1 215 0 is_stmt 1
+ 634 00b6 032B     		cmp	r3, #3
+ 635 00b8 03D0     		beq	.L73
+ 212:src/main.c    **** 	       (alive && (neighbors == 2 || neighbors == 3)) ? COPY :
+ 636              		.loc 1 212 0
+ 637 00ba 0120     		movs	r0, #1
+ 638 00bc 0FE0     		b	.L51
+ 639              	.L72:
+ 640 00be 0120     		movs	r0, #1
+ 641 00c0 0DE0     		b	.L51
+ 642              	.L73:
+ 643 00c2 0220     		movs	r0, #2
+ 644 00c4 0BE0     		b	.L51
+ 645              	.L71:
+ 646 00c6 0020     		movs	r0, #0
+ 647 00c8 09E0     		b	.L51
+ 648              	.L70:
+ 649 00ca 0120     		movs	r0, #1
+ 650 00cc 07E0     		b	.L51
+ 651              	.L69:
+ 652 00ce 0020     		movs	r0, #0
+ 653 00d0 05E0     		b	.L51
+ 654              	.LVL48:
+ 655              	.L65:
+ 656              	.LCFI6:
+ 657              		.cfi_def_cfa_offset 0
+ 658              		.cfi_restore 4
+ 659              		.cfi_restore 5
+ 194:src/main.c    **** 
+ 660              		.loc 1 194 0
+ 661 00d2 0020     		movs	r0, #0
+ 662              	.LVL49:
+ 663 00d4 7047     		bx	lr
+ 664              	.LVL50:
+ 665              	.L66:
+ 666 00d6 0020     		movs	r0, #0
+ 667              	.LVL51:
+ 668 00d8 7047     		bx	lr
+ 669              	.LVL52:
+ 670              	.L67:
+ 671 00da 0020     		movs	r0, #0
+ 672              	.LVL53:
+ 673 00dc 7047     		bx	lr
+ 674              	.LVL54:
+ 675              	.L51:
+ 676              	.LCFI7:
+ 677              		.cfi_def_cfa_offset 8
+ 678              		.cfi_offset 4, -8
+ 679              		.cfi_offset 5, -4
+ 216:src/main.c    **** 	       COPY;
+ 217:src/main.c    **** }
+ 680              		.loc 1 217 0
+ARM GAS  /tmp/ccrbWbmS.s 			page 17
+
+
+ 681 00de 30BC     		pop	{r4, r5}
+ 682              	.LCFI8:
+ 683              		.cfi_restore 5
+ 684              		.cfi_restore 4
+ 685              		.cfi_def_cfa_offset 0
+ 686              	.LVL55:
+ 687 00e0 7047     		bx	lr
+ 688              		.cfi_endproc
+ 689              	.LFE130:
+ 691 00e2 00BF     		.section	.text.processBuffer,"ax",%progbits
+ 692              		.align	2
+ 693              		.global	processBuffer
+ 694              		.thumb
+ 695              		.thumb_func
+ 697              	processBuffer:
+ 698              	.LFB129:
+ 162:src/main.c    **** 	// apply GOF rules on src and store result in dst.
+ 699              		.loc 1 162 0
+ 700              		.cfi_startproc
+ 701              		@ args = 0, pretend = 0, frame = 0
+ 702              		@ frame_needed = 0, uses_anonymous_args = 0
+ 703              	.LVL56:
+ 704 0000 2DE9F843 		push	{r3, r4, r5, r6, r7, r8, r9, lr}
+ 705              	.LCFI9:
+ 706              		.cfi_def_cfa_offset 32
+ 707              		.cfi_offset 3, -32
+ 708              		.cfi_offset 4, -28
+ 709              		.cfi_offset 5, -24
+ 710              		.cfi_offset 6, -20
+ 711              		.cfi_offset 7, -16
+ 712              		.cfi_offset 8, -12
+ 713              		.cfi_offset 9, -8
+ 714              		.cfi_offset 14, -4
+ 715 0004 0646     		mov	r6, r0
+ 716 0006 0D46     		mov	r5, r1
+ 717              	.LVL57:
+ 718              	.LBB10:
+ 164:src/main.c    **** 		CellAction action = analyzeCell(i,src);
+ 719              		.loc 1 164 0
+ 720 0008 0024     		movs	r4, #0
+ 721 000a 49E0     		b	.L77
+ 722              	.LVL58:
+ 723              	.L81:
+ 724              	.LBB11:
+ 165:src/main.c    **** 		if (COPY == action ){
+ 725              		.loc 1 165 0
+ 726 000c 2046     		mov	r0, r4
+ 727 000e 3146     		mov	r1, r6
+ 728 0010 FFF7FEFF 		bl	analyzeCell
+ 729              	.LVL59:
+ 166:src/main.c    **** 			dst[i] = src[i];
+ 730              		.loc 1 166 0
+ 731 0014 0128     		cmp	r0, #1
+ 732 0016 04D1     		bne	.L78
+ 167:src/main.c    **** 		}
+ 733              		.loc 1 167 0
+ 734 0018 56F82430 		ldr	r3, [r6, r4, lsl #2]
+ARM GAS  /tmp/ccrbWbmS.s 			page 18
+
+
+ 735 001c 45F82430 		str	r3, [r5, r4, lsl #2]
+ 736 0020 3DE0     		b	.L79
+ 737              	.L78:
+ 169:src/main.c    **** 			dst[i] = ((gammaTable[rand() % 255]) << 0) | ((gammaTable[rand() % 255]) << 8) | ((gammaTable[ra
+ 738              		.loc 1 169 0
+ 739 0022 0228     		cmp	r0, #2
+ 740 0024 34D1     		bne	.L80
+ 170:src/main.c    **** 			birthRate++;
+ 741              		.loc 1 170 0
+ 742 0026 FFF7FEFF 		bl	rand
+ 743              	.LVL60:
+ 744 002a DFF8B490 		ldr	r9, .L86+8
+ 745 002e 80FB0923 		smull	r2, r3, r0, r9
+ 746 0032 C218     		adds	r2, r0, r3
+ 747 0034 C317     		asrs	r3, r0, #31
+ 748 0036 C3EBE213 		rsb	r3, r3, r2, asr #7
+ 749 003a C3EB0323 		rsb	r3, r3, r3, lsl #8
+ 750 003e C31A     		subs	r3, r0, r3
+ 751 0040 254F     		ldr	r7, .L86
+ 752 0042 17F80380 		ldrb	r8, [r7, r3]	@ zero_extendqisi2
+ 753 0046 FFF7FEFF 		bl	rand
+ 754              	.LVL61:
+ 755 004a 80FB0923 		smull	r2, r3, r0, r9
+ 756 004e C218     		adds	r2, r0, r3
+ 757 0050 C317     		asrs	r3, r0, #31
+ 758 0052 C3EBE213 		rsb	r3, r3, r2, asr #7
+ 759 0056 C3EB0323 		rsb	r3, r3, r3, lsl #8
+ 760 005a C31A     		subs	r3, r0, r3
+ 761 005c FB5C     		ldrb	r3, [r7, r3]	@ zero_extendqisi2
+ 762 005e 48EA0328 		orr	r8, r8, r3, lsl #8
+ 763 0062 FFF7FEFF 		bl	rand
+ 764              	.LVL62:
+ 765 0066 80FB0923 		smull	r2, r3, r0, r9
+ 766 006a C218     		adds	r2, r0, r3
+ 767 006c C317     		asrs	r3, r0, #31
+ 768 006e C3EBE213 		rsb	r3, r3, r2, asr #7
+ 769 0072 C3EB0323 		rsb	r3, r3, r3, lsl #8
+ 770 0076 C31A     		subs	r3, r0, r3
+ 771 0078 FB5C     		ldrb	r3, [r7, r3]	@ zero_extendqisi2
+ 772 007a 48EA0348 		orr	r8, r8, r3, lsl #16
+ 773 007e 48F08073 		orr	r3, r8, #16777216
+ 774 0082 45F82430 		str	r3, [r5, r4, lsl #2]
+ 171:src/main.c    **** 		}
+ 775              		.loc 1 171 0
+ 776 0086 154A     		ldr	r2, .L86+4
+ 777 0088 1368     		ldr	r3, [r2]
+ 778 008a 0133     		adds	r3, r3, #1
+ 779 008c 1360     		str	r3, [r2]
+ 780 008e 06E0     		b	.L79
+ 781              	.LVL63:
+ 782              	.L80:
+ 173:src/main.c    **** 			dst[i] = 0x00ffffff & src[i];
+ 783              		.loc 1 173 0
+ 784 0090 28B9     		cbnz	r0, .L79
+ 174:src/main.c    **** 		}
+ 785              		.loc 1 174 0
+ 786 0092 56F82430 		ldr	r3, [r6, r4, lsl #2]
+ARM GAS  /tmp/ccrbWbmS.s 			page 19
+
+
+ 787 0096 23F07F43 		bic	r3, r3, #-16777216
+ 788 009a 45F82430 		str	r3, [r5, r4, lsl #2]
+ 789              	.LVL64:
+ 790              	.L79:
+ 791              	.LBE11:
+ 164:src/main.c    **** 		CellAction action = analyzeCell(i,src);
+ 792              		.loc 1 164 0 discriminator 2
+ 793 009e 0134     		adds	r4, r4, #1
+ 794              	.LVL65:
+ 795              	.L77:
+ 164:src/main.c    **** 		CellAction action = analyzeCell(i,src);
+ 796              		.loc 1 164 0 is_stmt 0 discriminator 1
+ 797 00a0 B4F5806F 		cmp	r4, #1024
+ 798 00a4 B2DB     		blt	.L81
+ 799 00a6 0023     		movs	r3, #0
+ 800 00a8 11E0     		b	.L82
+ 801              	.LVL66:
+ 802              	.L84:
+ 803              	.LBE10:
+ 804              	.LBB12:
+ 180:src/main.c    **** 			dst[i] =  (((dst[i]       & 0x000000ff) >> 1))       |
+ 805              		.loc 1 180 0 is_stmt 1
+ 806 00aa 55F82320 		ldr	r2, [r5, r3, lsl #2]
+ 807 00ae 12F0807F 		tst	r2, #16777216
+ 808 00b2 0BD1     		bne	.L83
+ 181:src/main.c    **** 	              (((dst[i] >> 8  & 0x000000ff) >> 1) << 8)  |
+ 809              		.loc 1 181 0
+ 810 00b4 C2F34601 		ubfx	r1, r2, #1, #7
+ 182:src/main.c    **** 	              (((dst[i] >> 16 & 0x000000ff) >> 1) << 16);
+ 811              		.loc 1 182 0
+ 812 00b8 C2F34620 		ubfx	r0, r2, #9, #7
+ 181:src/main.c    **** 	              (((dst[i] >> 8  & 0x000000ff) >> 1) << 8)  |
+ 813              		.loc 1 181 0
+ 814 00bc 41EA0021 		orr	r1, r1, r0, lsl #8
+ 183:src/main.c    **** 		}
+ 815              		.loc 1 183 0
+ 816 00c0 C2F34642 		ubfx	r2, r2, #17, #7
+ 182:src/main.c    **** 	              (((dst[i] >> 16 & 0x000000ff) >> 1) << 16);
+ 817              		.loc 1 182 0
+ 818 00c4 41EA0242 		orr	r2, r1, r2, lsl #16
+ 181:src/main.c    **** 	              (((dst[i] >> 8  & 0x000000ff) >> 1) << 8)  |
+ 819              		.loc 1 181 0
+ 820 00c8 45F82320 		str	r2, [r5, r3, lsl #2]
+ 821              	.L83:
+ 179:src/main.c    **** 		if (! (0x01000000 & dst[i]) ){
+ 822              		.loc 1 179 0 discriminator 2
+ 823 00cc 0133     		adds	r3, r3, #1
+ 824              	.LVL67:
+ 825              	.L82:
+ 179:src/main.c    **** 		if (! (0x01000000 & dst[i]) ){
+ 826              		.loc 1 179 0 is_stmt 0 discriminator 1
+ 827 00ce B3F5806F 		cmp	r3, #1024
+ 828 00d2 EADB     		blt	.L84
+ 829              	.LBE12:
+ 186:src/main.c    **** 
+ 830              		.loc 1 186 0 is_stmt 1
+ 831 00d4 BDE8F883 		pop	{r3, r4, r5, r6, r7, r8, r9, pc}
+ARM GAS  /tmp/ccrbWbmS.s 			page 20
+
+
+ 832              	.LVL68:
+ 833              	.L87:
+ 834              		.align	2
+ 835              	.L86:
+ 836 00d8 00000000 		.word	gammaTable
+ 837 00dc 00000000 		.word	.LANCHOR1
+ 838 00e0 81808080 		.word	-2139062143
+ 839              		.cfi_endproc
+ 840              	.LFE129:
+ 842              		.section	.text.setupRGBMatrixPorts,"ax",%progbits
+ 843              		.align	2
+ 844              		.global	setupRGBMatrixPorts
+ 845              		.thumb
+ 846              		.thumb_func
+ 848              	setupRGBMatrixPorts:
+ 849              	.LFB131:
+ 218:src/main.c    **** 
+ 219:src/main.c    **** void setupRGBMatrixPorts() {
+ 850              		.loc 1 219 0
+ 851              		.cfi_startproc
+ 852              		@ args = 0, pretend = 0, frame = 0
+ 853              		@ frame_needed = 0, uses_anonymous_args = 0
+ 854 0000 38B5     		push	{r3, r4, r5, lr}
+ 855              	.LCFI10:
+ 856              		.cfi_def_cfa_offset 16
+ 857              		.cfi_offset 3, -16
+ 858              		.cfi_offset 4, -12
+ 859              		.cfi_offset 5, -8
+ 860              		.cfi_offset 14, -4
+ 220:src/main.c    **** 	static GPIO_InitTypeDef GPIO_InitStructure;
+ 221:src/main.c    **** 	RCC_APB2PeriphClockCmd(MTX_RCCPB, ENABLE);                        // enable matrix GPIO port
+ 861              		.loc 1 221 0
+ 862 0002 0220     		movs	r0, #2
+ 863 0004 0121     		movs	r1, #1
+ 864 0006 FFF7FEFF 		bl	RCC_APB2PeriphClockCmd
+ 865              	.LVL69:
+ 222:src/main.c    **** 	RCC_APB2PeriphClockCmd(LED_RCCPB, ENABLE);                        // enable LED GPIO port
+ 866              		.loc 1 222 0
+ 867 000a 0420     		movs	r0, #4
+ 868 000c 0121     		movs	r1, #1
+ 869 000e FFF7FEFF 		bl	RCC_APB2PeriphClockCmd
+ 870              	.LVL70:
+ 223:src/main.c    **** 	// RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);              // enable AFIO module, needed
+ 224:src/main.c    **** 
+ 225:src/main.c    **** 	// GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE); 					// disable JTAG Debugging, we onl
+ 226:src/main.c    **** 
+ 227:src/main.c    **** 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+ 871              		.loc 1 227 0
+ 872 0012 144C     		ldr	r4, .L90
+ 873 0014 0223     		movs	r3, #2
+ 874 0016 6371     		strb	r3, [r4, #5]
+ 228:src/main.c    **** 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+ 875              		.loc 1 228 0
+ 876 0018 0123     		movs	r3, #1
+ 877 001a 2371     		strb	r3, [r4, #4]
+ 229:src/main.c    **** 
+ 230:src/main.c    **** 	GPIO_InitStructure.GPIO_Pin = MTX_PR0 | MTX_PG0 | MTX_PB0;        // RGB0
+ARM GAS  /tmp/ccrbWbmS.s 			page 21
+
+
+ 878              		.loc 1 230 0
+ 879 001c 3823     		movs	r3, #56
+ 880 001e 2360     		str	r3, [r4]
+ 231:src/main.c    **** 	GPIO_Init(MTX_PORT, &GPIO_InitStructure);
+ 881              		.loc 1 231 0
+ 882 0020 114D     		ldr	r5, .L90+4
+ 883 0022 2846     		mov	r0, r5
+ 884 0024 2146     		mov	r1, r4
+ 885 0026 FFF7FEFF 		bl	GPIO_Init
+ 886              	.LVL71:
+ 232:src/main.c    **** 
+ 233:src/main.c    **** 	GPIO_InitStructure.GPIO_Pin = MTX_PR1 | MTX_PG1 | MTX_PB1;        // RGB1
+ 887              		.loc 1 233 0
+ 888 002a 4FF4E073 		mov	r3, #448
+ 889 002e 2360     		str	r3, [r4]
+ 234:src/main.c    **** 	GPIO_Init(MTX_PORT, &GPIO_InitStructure);
+ 890              		.loc 1 234 0
+ 891 0030 2846     		mov	r0, r5
+ 892 0032 2146     		mov	r1, r4
+ 893 0034 FFF7FEFF 		bl	GPIO_Init
+ 894              	.LVL72:
+ 235:src/main.c    **** 
+ 236:src/main.c    **** 	GPIO_InitStructure.GPIO_Pin = MTX_PA | MTX_PB | MTX_PC | MTX_PD;  // ABCD
+ 895              		.loc 1 236 0
+ 896 0038 4FF47043 		mov	r3, #61440
+ 897 003c 2360     		str	r3, [r4]
+ 237:src/main.c    **** 	GPIO_Init(MTX_PORT, &GPIO_InitStructure);
+ 898              		.loc 1 237 0
+ 899 003e 2846     		mov	r0, r5
+ 900 0040 2146     		mov	r1, r4
+ 901 0042 FFF7FEFF 		bl	GPIO_Init
+ 902              	.LVL73:
+ 238:src/main.c    **** 
+ 239:src/main.c    **** 	GPIO_InitStructure.GPIO_Pin = MTX_PSTB | MTX_POE | MTX_PCLK;      // Strobe, OutputEnable, Clock
+ 903              		.loc 1 239 0
+ 904 0046 40F20323 		movw	r3, #515
+ 905 004a 2360     		str	r3, [r4]
+ 240:src/main.c    **** 	GPIO_Init(MTX_PORT, &GPIO_InitStructure);
+ 906              		.loc 1 240 0
+ 907 004c 2846     		mov	r0, r5
+ 908 004e 2146     		mov	r1, r4
+ 909 0050 FFF7FEFF 		bl	GPIO_Init
+ 910              	.LVL74:
+ 241:src/main.c    **** 
+ 242:src/main.c    **** 	GPIO_InitStructure.GPIO_Pin = LED_P;                              // Status LED
+ 911              		.loc 1 242 0
+ 912 0054 4FF40053 		mov	r3, #8192
+ 913 0058 2360     		str	r3, [r4]
+ 243:src/main.c    **** 	GPIO_Init(LED_PORT, &GPIO_InitStructure);
+ 914              		.loc 1 243 0
+ 915 005a 0448     		ldr	r0, .L90+8
+ 916 005c 2146     		mov	r1, r4
+ 917 005e FFF7FEFF 		bl	GPIO_Init
+ 918              	.LVL75:
+ 919 0062 38BD     		pop	{r3, r4, r5, pc}
+ 920              	.L91:
+ 921              		.align	2
+ARM GAS  /tmp/ccrbWbmS.s 			page 22
+
+
+ 922              	.L90:
+ 923 0064 00000000 		.word	.LANCHOR2
+ 924 0068 00040240 		.word	1073873920
+ 925 006c 00080240 		.word	1073874944
+ 926              		.cfi_endproc
+ 927              	.LFE131:
+ 929              		.global	__aeabi_i2d
+ 930              		.global	__aeabi_dmul
+ 931              		.global	__aeabi_d2uiz
+ 932              		.section	.text.main,"ax",%progbits
+ 933              		.align	2
+ 934              		.global	main
+ 935              		.thumb
+ 936              		.thumb_func
+ 938              	main:
+ 939              	.LFB123:
+  20:src/main.c    **** 	setupRGBMatrixPorts();
+ 940              		.loc 1 20 0
+ 941              		.cfi_startproc
+ 942              		@ args = 0, pretend = 0, frame = 0
+ 943              		@ frame_needed = 0, uses_anonymous_args = 0
+ 944 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 945              	.LCFI11:
+ 946              		.cfi_def_cfa_offset 24
+ 947              		.cfi_offset 3, -24
+ 948              		.cfi_offset 4, -20
+ 949              		.cfi_offset 5, -16
+ 950              		.cfi_offset 6, -12
+ 951              		.cfi_offset 7, -8
+ 952              		.cfi_offset 14, -4
+  21:src/main.c    **** 
+ 953              		.loc 1 21 0
+ 954 0002 FFF7FEFF 		bl	setupRGBMatrixPorts
+ 955              	.LVL76:
+  23:src/main.c    **** 
+ 956              		.loc 1 23 0
+ 957 0006 4FF40052 		mov	r2, #8192
+ 958 000a 454B     		ldr	r3, .L103+16
+ 959 000c 5A83     		strh	r2, [r3, #26]	@ movhi
+ 960              	.LVL77:
+  26:src/main.c    **** 	for (; i < 256; i++) gammaTable[i] = 255 * pow((i / 256.0), 1.6);
+ 961              		.loc 1 26 0
+ 962 000e 0024     		movs	r4, #0
+  27:src/main.c    **** 
+ 963              		.loc 1 27 0
+ 964 0010 18E0     		b	.L93
+ 965              	.LVL78:
+ 966              	.L94:
+  27:src/main.c    **** 
+ 967              		.loc 1 27 0 is_stmt 0 discriminator 2
+ 968 0012 2046     		mov	r0, r4
+ 969 0014 FFF7FEFF 		bl	__aeabi_i2d
+ 970              	.LVL79:
+ 971 0018 0022     		movs	r2, #0
+ 972 001a 424B     		ldr	r3, .L103+20
+ 973 001c FFF7FEFF 		bl	__aeabi_dmul
+ 974              	.LVL80:
+ARM GAS  /tmp/ccrbWbmS.s 			page 23
+
+
+ 975 0020 41EC100B 		fmdrr	d0, r0, r1
+ 976 0024 9FED3A1B 		fldd	d1, .L103
+ 977 0028 FFF7FEFF 		bl	pow
+ 978              	.LVL81:
+ 979 002c 51EC100B 		fmrrd	r0, r1, d0
+ 980 0030 39A3     		adr	r3, .L103+8
+ 981 0032 D3E90023 		ldrd	r2, [r3]
+ 982 0036 FFF7FEFF 		bl	__aeabi_dmul
+ 983              	.LVL82:
+ 984 003a FFF7FEFF 		bl	__aeabi_d2uiz
+ 985              	.LVL83:
+ 986 003e 3A4B     		ldr	r3, .L103+24
+ 987 0040 1855     		strb	r0, [r3, r4]
+ 988 0042 0134     		adds	r4, r4, #1
+ 989              	.LVL84:
+ 990              	.L93:
+  27:src/main.c    **** 
+ 991              		.loc 1 27 0 discriminator 1
+ 992 0044 FF2C     		cmp	r4, #255
+ 993 0046 E4DD     		ble	.L94
+  30:src/main.c    **** 	memset(bufferB, 0, sizeof(bufferB));
+ 994              		.loc 1 30 0 is_stmt 1
+ 995 0048 384C     		ldr	r4, .L103+28
+ 996              	.LVL85:
+ 997 004a 4FF48055 		mov	r5, #4096
+ 998 004e 2046     		mov	r0, r4
+ 999 0050 0021     		movs	r1, #0
+ 1000 0052 2A46     		mov	r2, r5
+ 1001 0054 FFF7FEFF 		bl	memset
+ 1002              	.LVL86:
+  31:src/main.c    **** 
+ 1003              		.loc 1 31 0
+ 1004 0058 3548     		ldr	r0, .L103+32
+ 1005 005a 0021     		movs	r1, #0
+ 1006 005c 2A46     		mov	r2, r5
+ 1007 005e FFF7FEFF 		bl	memset
+ 1008              	.LVL87:
+  35:src/main.c    **** 	bufferA[31]   = 0x00005000;
+ 1009              		.loc 1 35 0
+ 1010 0062 5023     		movs	r3, #80
+ 1011 0064 2360     		str	r3, [r4]
+  36:src/main.c    **** 	bufferA[992]  = 0x00500000;
+ 1012              		.loc 1 36 0
+ 1013 0066 4FF4A043 		mov	r3, #20480
+ 1014 006a E367     		str	r3, [r4, #124]
+  37:src/main.c    **** 	bufferA[1023] = 0x00505000;
+ 1015              		.loc 1 37 0
+ 1016 006c 4FF4A003 		mov	r3, #5242880
+ 1017 0070 C4F8803F 		str	r3, [r4, #3968]
+  38:src/main.c    **** 
+ 1018              		.loc 1 38 0
+ 1019 0074 03F5A043 		add	r3, r3, #20480
+ 1020 0078 C4F8FC3F 		str	r3, [r4, #4092]
+ 1021              	.LVL88:
+ 1022              	.LBB13:
+  41:src/main.c    **** 		displayBuffer(bufferA);
+ 1023              		.loc 1 41 0
+ARM GAS  /tmp/ccrbWbmS.s 			page 24
+
+
+ 1024 007c 0024     		movs	r4, #0
+ 1025 007e 03E0     		b	.L95
+ 1026              	.LVL89:
+ 1027              	.L96:
+  42:src/main.c    **** 	}
+ 1028              		.loc 1 42 0 discriminator 3
+ 1029 0080 2A48     		ldr	r0, .L103+28
+ 1030 0082 FFF7FEFF 		bl	displayBuffer
+ 1031              	.LVL90:
+  41:src/main.c    **** 		displayBuffer(bufferA);
+ 1032              		.loc 1 41 0 discriminator 3
+ 1033 0086 0134     		adds	r4, r4, #1
+ 1034              	.LVL91:
+ 1035              	.L95:
+  41:src/main.c    **** 		displayBuffer(bufferA);
+ 1036              		.loc 1 41 0 is_stmt 0 discriminator 1
+ 1037 0088 632C     		cmp	r4, #99
+ 1038 008a F9DD     		ble	.L96
+ 1039              	.LBE13:
+  45:src/main.c    **** 
+ 1040              		.loc 1 45 0 is_stmt 1
+ 1041 008c 4FF40052 		mov	r2, #8192
+ 1042 0090 234B     		ldr	r3, .L103+16
+ 1043 0092 1A83     		strh	r2, [r3, #24]	@ movhi
+ 1044              	.LVL92:
+  50:src/main.c    **** 
+ 1045              		.loc 1 50 0
+ 1046 0094 254D     		ldr	r5, .L103+28
+ 1047 0096 2846     		mov	r0, r5
+ 1048 0098 FFF7FEFF 		bl	randomizeFramebuffer
+ 1049              	.LVL93:
+  52:src/main.c    **** 	while (1) {
+ 1050              		.loc 1 52 0
+ 1051 009c 0024     		movs	r4, #0
+ 1052              	.LVL94:
+  49:src/main.c    **** 	randomizeFramebuffer(currentBuffer);
+ 1053              		.loc 1 49 0
+ 1054 009e 244F     		ldr	r7, .L103+32
+  48:src/main.c    **** 	uint32_t* dstBuffer = bufferB;
+ 1055              		.loc 1 48 0
+ 1056 00a0 2E46     		mov	r6, r5
+ 1057              	.LVL95:
+ 1058              	.L97:
+ 1059              	.LBB14:
+  54:src/main.c    **** 		birthRate  = 0;
+ 1060              		.loc 1 54 0
+ 1061 00a2 2846     		mov	r0, r5
+ 1062 00a4 FFF7FEFF 		bl	displayBuffer
+ 1063              	.LVL96:
+  55:src/main.c    **** 		int simRun = 0;
+ 1064              		.loc 1 55 0
+ 1065 00a8 0022     		movs	r2, #0
+ 1066 00aa 224B     		ldr	r3, .L103+36
+ 1067 00ac 1A60     		str	r2, [r3]
+ 1068              	.LVL97:
+  58:src/main.c    **** 			simRun = 1;
+ 1069              		.loc 1 58 0
+ARM GAS  /tmp/ccrbWbmS.s 			page 25
+
+
+ 1070 00ae 0134     		adds	r4, r4, #1
+ 1071              	.LVL98:
+ 1072 00b0 214B     		ldr	r3, .L103+40
+ 1073 00b2 83FB0432 		smull	r3, r2, r3, r4
+ 1074 00b6 E317     		asrs	r3, r4, #31
+ 1075 00b8 C3EB6203 		rsb	r3, r3, r2, asr #1
+ 1076 00bc 03EB8303 		add	r3, r3, r3, lsl #2
+ 1077 00c0 9C42     		cmp	r4, r3
+ 1078 00c2 08D1     		bne	.L101
+ 1079              	.LVL99:
+  60:src/main.c    **** 
+ 1080              		.loc 1 60 0
+ 1081 00c4 3046     		mov	r0, r6
+ 1082 00c6 3946     		mov	r1, r7
+ 1083 00c8 FFF7FEFF 		bl	processBuffer
+ 1084              	.LVL100:
+  65:src/main.c    **** 		}
+ 1085              		.loc 1 65 0
+ 1086 00cc 3D46     		mov	r5, r7
+  64:src/main.c    **** 			currentBuffer = srcBuffer;
+ 1087              		.loc 1 64 0
+ 1088 00ce 3746     		mov	r7, r6
+ 1089              	.LVL101:
+  63:src/main.c    **** 			dstBuffer     = currentBuffer;
+ 1090              		.loc 1 63 0
+ 1091 00d0 2E46     		mov	r6, r5
+ 1092              	.LVL102:
+  59:src/main.c    **** 			processBuffer(srcBuffer,dstBuffer);
+ 1093              		.loc 1 59 0
+ 1094 00d2 0121     		movs	r1, #1
+ 1095 00d4 00E0     		b	.L98
+ 1096              	.LVL103:
+ 1097              	.L101:
+  56:src/main.c    **** 
+ 1098              		.loc 1 56 0
+ 1099 00d6 0021     		movs	r1, #0
+ 1100              	.LVL104:
+ 1101              	.L98:
+  67:src/main.c    **** 			randomizeFramebuffer(currentBuffer);
+ 1102              		.loc 1 67 0
+ 1103 00d8 184B     		ldr	r3, .L103+44
+ 1104 00da 83FB0432 		smull	r3, r2, r3, r4
+ 1105 00de E317     		asrs	r3, r4, #31
+ 1106 00e0 C3EB2223 		rsb	r3, r3, r2, asr #8
+ 1107 00e4 4FF47A62 		mov	r2, #4000
+ 1108 00e8 02FB1343 		mls	r3, r2, r3, r4
+ 1109 00ec 2BB1     		cbz	r3, .L99
+  67:src/main.c    **** 			randomizeFramebuffer(currentBuffer);
+ 1110              		.loc 1 67 0 is_stmt 0 discriminator 1
+ 1111 00ee 114B     		ldr	r3, .L103+36
+ 1112 00f0 1B68     		ldr	r3, [r3]
+ 1113 00f2 092B     		cmp	r3, #9
+ 1114 00f4 D5D8     		bhi	.L97
+  67:src/main.c    **** 			randomizeFramebuffer(currentBuffer);
+ 1115              		.loc 1 67 0 discriminator 2
+ 1116 00f6 0029     		cmp	r1, #0
+ 1117 00f8 D3D0     		beq	.L97
+ARM GAS  /tmp/ccrbWbmS.s 			page 26
+
+
+ 1118              	.L99:
+  68:src/main.c    **** 			LED_PORT->ODR ^= LED_P;
+ 1119              		.loc 1 68 0 is_stmt 1
+ 1120 00fa 2846     		mov	r0, r5
+ 1121 00fc FFF7FEFF 		bl	randomizeFramebuffer
+ 1122              	.LVL105:
+  69:src/main.c    **** 		}
+ 1123              		.loc 1 69 0
+ 1124 0100 074A     		ldr	r2, .L103+16
+ 1125 0102 5369     		ldr	r3, [r2, #20]
+ 1126 0104 83F40053 		eor	r3, r3, #8192
+ 1127 0108 5361     		str	r3, [r2, #20]
+ 1128 010a CAE7     		b	.L97
+ 1129              	.L104:
+ 1130 010c AFF30080 		.align	3
+ 1131              	.L103:
+ 1132 0110 9A999999 		.word	2576980378
+ 1133 0114 9999F93F 		.word	1073322393
+ 1134 0118 00000000 		.word	0
+ 1135 011c 00E06F40 		.word	1081073664
+ 1136 0120 00080240 		.word	1073874944
+ 1137 0124 0000703F 		.word	1064304640
+ 1138 0128 00000000 		.word	gammaTable
+ 1139 012c 00000000 		.word	bufferA
+ 1140 0130 00000000 		.word	bufferB
+ 1141 0134 00000000 		.word	.LANCHOR1
+ 1142 0138 67666666 		.word	1717986919
+ 1143 013c D34D6210 		.word	274877907
+ 1144              	.LBE14:
+ 1145              		.cfi_endproc
+ 1146              	.LFE123:
+ 1148              		.global	birthRate
+ 1149              		.comm	bufferB,4096,4
+ 1150              		.comm	bufferA,4096,4
+ 1151              		.comm	gammaTable,256,4
+ 1152              		.global	scan
+ 1153              		.global	waits
+ 1154              		.section	.rodata.waits,"a",%progbits
+ 1155              		.align	2
+ 1156              		.set	.LANCHOR0,. + 0
+ 1159              	waits:
+ 1160 0000 05000000 		.word	5
+ 1161 0004 0A000000 		.word	10
+ 1162 0008 14000000 		.word	20
+ 1163 000c 28000000 		.word	40
+ 1164 0010 50000000 		.word	80
+ 1165 0014 A0000000 		.word	160
+ 1166 0018 40010000 		.word	320
+ 1167 001c 80020000 		.word	640
+ 1168              		.section	.rodata.scan,"a",%progbits
+ 1169              		.align	2
+ 1172              	scan:
+ 1173 0000 10000000 		.word	16
+ 1174              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 1175              		.align	2
+ 1176              	.LC0:
+ 1177 0000 6E6F7000 		.ascii	"nop\000"
+ARM GAS  /tmp/ccrbWbmS.s 			page 27
+
+
+ 1178              		.section	.bss.birthRate,"aw",%nobits
+ 1179              		.align	2
+ 1180              		.set	.LANCHOR1,. + 0
+ 1183              	birthRate:
+ 1184 0000 00000000 		.space	4
+ 1185              		.section	.bss.GPIO_InitStructure.9267,"aw",%nobits
+ 1186              		.align	2
+ 1187              		.set	.LANCHOR2,. + 0
+ 1190              	GPIO_InitStructure.9267:
+ 1191 0000 00000000 		.space	8
+ 1191      00000000 
+ 1192              		.text
+ 1193              	.Letext0:
+ 1194              		.file 2 "/usr/include/newlib/machine/_default_types.h"
+ 1195              		.file 3 "/usr/include/newlib/sys/_stdint.h"
+ 1196              		.file 4 "/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/CMSIS/Device/ST/STM32F4xx/
+ 1197              		.file 5 "/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver
+ 1198              		.file 6 "include/main.h"
+ 1199              		.file 7 "/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/CMSIS/Include/core_cm4.h"
+ 1200              		.file 8 "/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver
+ 1201              		.file 9 "/usr/include/newlib/stdlib.h"
+ 1202              		.file 10 "/usr/include/newlib/math.h"
+ARM GAS  /tmp/ccrbWbmS.s 			page 28
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 main.c
+     /tmp/ccrbWbmS.s:21     .text.randomizeFramebuffer:0000000000000000 $t
+     /tmp/ccrbWbmS.s:26     .text.randomizeFramebuffer:0000000000000000 randomizeFramebuffer
+     /tmp/ccrbWbmS.s:111    .text.randomizeFramebuffer:000000000000008c $d
+                            *COM*:0000000000000100 gammaTable
+     /tmp/ccrbWbmS.s:117    .text.setRow:0000000000000000 $t
+     /tmp/ccrbWbmS.s:122    .text.setRow:0000000000000000 setRow
+     /tmp/ccrbWbmS.s:189    .text.setRow:0000000000000064 $d
+     /tmp/ccrbWbmS.s:194    .text.setRGB:0000000000000000 $t
+     /tmp/ccrbWbmS.s:199    .text.setRGB:0000000000000000 setRGB
+     /tmp/ccrbWbmS.s:320    .text.setRGB:0000000000000088 $d
+     /tmp/ccrbWbmS.s:325    .text.showLine:0000000000000000 $t
+     /tmp/ccrbWbmS.s:330    .text.showLine:0000000000000000 showLine
+     /tmp/ccrbWbmS.s:382    .text.showLine:0000000000000028 $d
+     /tmp/ccrbWbmS.s:388    .text.displayBuffer:0000000000000000 $t
+     /tmp/ccrbWbmS.s:393    .text.displayBuffer:0000000000000000 displayBuffer
+     /tmp/ccrbWbmS.s:494    .text.displayBuffer:0000000000000068 $d
+     /tmp/ccrbWbmS.s:500    .text.analyzeCell:0000000000000000 $t
+     /tmp/ccrbWbmS.s:505    .text.analyzeCell:0000000000000000 analyzeCell
+     /tmp/ccrbWbmS.s:692    .text.processBuffer:0000000000000000 $t
+     /tmp/ccrbWbmS.s:697    .text.processBuffer:0000000000000000 processBuffer
+     /tmp/ccrbWbmS.s:836    .text.processBuffer:00000000000000d8 $d
+     /tmp/ccrbWbmS.s:843    .text.setupRGBMatrixPorts:0000000000000000 $t
+     /tmp/ccrbWbmS.s:848    .text.setupRGBMatrixPorts:0000000000000000 setupRGBMatrixPorts
+     /tmp/ccrbWbmS.s:923    .text.setupRGBMatrixPorts:0000000000000064 $d
+     /tmp/ccrbWbmS.s:933    .text.main:0000000000000000 $t
+     /tmp/ccrbWbmS.s:938    .text.main:0000000000000000 main
+     /tmp/ccrbWbmS.s:1132   .text.main:0000000000000110 $d
+                            *COM*:0000000000001000 bufferA
+                            *COM*:0000000000001000 bufferB
+     /tmp/ccrbWbmS.s:1183   .bss.birthRate:0000000000000000 birthRate
+     /tmp/ccrbWbmS.s:1172   .rodata.scan:0000000000000000 scan
+     /tmp/ccrbWbmS.s:1159   .rodata.waits:0000000000000000 waits
+     /tmp/ccrbWbmS.s:1155   .rodata.waits:0000000000000000 $d
+     /tmp/ccrbWbmS.s:1169   .rodata.scan:0000000000000000 $d
+     /tmp/ccrbWbmS.s:1175   .rodata.str1.4:0000000000000000 $d
+     /tmp/ccrbWbmS.s:1179   .bss.birthRate:0000000000000000 $d
+     /tmp/ccrbWbmS.s:1186   .bss.GPIO_InitStructure.9267:0000000000000000 $d
+     /tmp/ccrbWbmS.s:1190   .bss.GPIO_InitStructure.9267:0000000000000000 GPIO_InitStructure.9267
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.ada664092ec687a6ddfd94a20249b16a
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.9f8fcfa20193763fcf364fb91705c94b
+                           .group:0000000000000000 wm4.stdio.h.31.7c0e28c411445f3f9c5b11accf882760
+                           .group:0000000000000000 wm4._default_types.h.6.35ee9e747940367bf2a634907d1c2382
+                           .group:0000000000000000 wm4.stddef.h.184.159df79b4ca79c76561572a55985524c
+                           .group:0000000000000000 wm4.cdefs.h.47.3052445825803de6c3a3b68ec8193866
+                           .group:0000000000000000 wm4.stddef.h.39.7e3d906ac58942e0b374c527445f5de5
+                           .group:0000000000000000 wm4.stdarg.h.34.3a23a216c0c293b3d2ea2e89281481e6
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.types.h.24.b2be5f53932a9c9d07787288b29b6d75
+ARM GAS  /tmp/ccrbWbmS.s 			page 29
+
+
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.types.h.2.e9cec8c90ab35f77d9f499e06ae02400
+                           .group:0000000000000000 wm4.types.h.82.82b71f3f44c70e3a459d0f66642b05eb
+                           .group:0000000000000000 wm4.stdio.h.2.4aa87247282eca6c8f36f9de33d8df1a
+                           .group:0000000000000000 wm4.stdio.h.68.ff6d7571d3ad75c55f15e26dbaa81e35
+                           .group:0000000000000000 wm4.stm32f4xx.h.54.1a026671df242b45edd4a2d9a385d790
+                           .group:0000000000000000 wm4.core_cm4.h.43.f75e2f71b2e33f7a3db429cd8b0cae9e
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.core_cmInstr.h.39.addda81f1f3453ba31dd54fc5b6fcee8
+                           .group:0000000000000000 wm4.core_cmSimd.h.43.c355993beb49ccd10586af5b1cfe5aee
+                           .group:0000000000000000 wm4.core_cm4.h.201.38b66ea2c12d55e26a2374d5521b1bde
+                           .group:0000000000000000 wm4.stm32f4xx.h.860.dd64398f46e57985bc86e7cf18ec326f
+                           .group:0000000000000000 wm4.stm32f4xx_adc.h.108.50f89bb433cbd21c5f52bf8ae55d6c79
+                           .group:0000000000000000 wm4.stm32f4xx_dbgmcu.h.30.70a81ec54c2707baa9fca77391eeeaaa
+                           .group:0000000000000000 wm4.stm32f4xx_dma.h.31.52d961de9ff5e60f8cab69f316bc8a32
+                           .group:0000000000000000 wm4.stm32f4xx_exti.h.31.f8872db4c73f614dc5467052eb869767
+                           .group:0000000000000000 wm4.stm32f4xx_flash.h.31.512b7e2e7cffed751a2b115a66cd19e7
+                           .group:0000000000000000 wm4.stm32f4xx_gpio.h.31.cff4b1f81e3b7649bb4707460a69576c
+                           .group:0000000000000000 wm4.stm32f4xx_i2c.h.31.5da502b7dbdc7954711b9d802187d4c5
+                           .group:0000000000000000 wm4.stm32f4xx_iwdg.h.31.30e376e6d8d424aab7fddd66cf691c7b
+                           .group:0000000000000000 wm4.stm32f4xx_pwr.h.31.04b4e0b17d0825b81e6ed8e26b1c800c
+                           .group:0000000000000000 wm4.stm32f4xx_rcc.h.30.19b8705d51b04ca220e05988d22690a2
+                           .group:0000000000000000 wm4.stm32f4xx_rtc.h.31.d619c8d8c416bda4a72c155ca8d281aa
+                           .group:0000000000000000 wm4.stm32f4xx_sdio.h.31.167ce011aeec136e7d6a903a0171b853
+                           .group:0000000000000000 wm4.stm32f4xx_spi.h.31.8e833b3876fd453f4e9bfcc8fa53481f
+                           .group:0000000000000000 wm4.stm32f4xx_syscfg.h.31.25e8216f4b89fd14fb4f9412c2c75af0
+                           .group:0000000000000000 wm4.stm32f4xx_tim.h.31.b1d608fbde729347e4ccf70799e654d2
+                           .group:0000000000000000 wm4.stm32f4xx_usart.h.31.3e1c4e996b3922a213c99d3add6ff29c
+                           .group:0000000000000000 wm4.stm32f4xx_wwdg.h.31.b45a80fa1ec64984adf786f7e489f31b
+                           .group:0000000000000000 wm4.misc.h.31.041217492a6cb86f2fb26099f373a465
+                           .group:0000000000000000 wm4.stm32f4xx_cryp.h.31.1d2f959bcf858c5bd429e33a885bdda2
+                           .group:0000000000000000 wm4.stm32f4xx_hash.h.31.b42694b6f39376d2a170b53244af1aaa
+                           .group:0000000000000000 wm4.stm32f4xx_rng.h.31.1ec493d56b7a8e5a71238519cae6dea7
+                           .group:0000000000000000 wm4.stm32f4xx_can.h.31.d0537057b3ecc126d0cceacbbc9cdc27
+                           .group:0000000000000000 wm4.stm32f4xx_dac.h.31.b8d45e7eaf71ee4bf01c1317dbc06f77
+                           .group:0000000000000000 wm4.stm32f4xx_dcmi.h.30.9d0942d58c357d2eed15e044bf9b4a77
+                           .group:0000000000000000 wm4.stm32f4xx_fsmc.h.31.ff58629e0c603fb2f9b3f00c0657fdfa
+                           .group:0000000000000000 wm4.stm32f4xx.h.12034.dfbce5ca84da4032c98cb9d89dddb98c
+                           .group:0000000000000000 wm4.math.h.35.cb534dd1309c83ba8cc927539f9d9d6b
+                           .group:0000000000000000 wm4.string.h.8.c4b8571ce60dff2817f43fec8b86aecd
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4.stdlib.h.13.4ed386f5c1a80d71e72172885d946ef2
+                           .group:0000000000000000 wm4.stdlib.h.54.4fb06e985dc2cdf07f3ef03d3ed01397
+                           .group:0000000000000000 wm4.matrix_config.h.2.b76b1a30ed56d0968d64504c4fd18829
+
+UNDEFINED SYMBOLS
+rand
+asm
+RCC_APB2PeriphClockCmd
+GPIO_Init
+__aeabi_i2d
+__aeabi_dmul
+__aeabi_d2uiz
+pow
+memset

@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include "stm32f10x.h"
-#include "stm32f10x_gpio.h"
-#include "stm32f10x_rcc.h"
+#include "stm32f4xx.h"
+// #include "stm32f4xx_gpio.h"
+// #include "stm32f4xx_rcc.h"
 #include "math.h"
 #include "string.h"
 #include "stdlib.h"
@@ -17,13 +17,30 @@ uint32_t birthRate = 0;
 
 // ----- Timing definitions -------------------------------------------------
 
+void WaitaMoment (int time)
+{
+for (; time > 0; time--);
+}
+
+
 int main() {
+
+// RCC -> AHB1ENR |= RCC_AHB1ENR_GPIODEN;
+// GPIOD -> MODER |= GPIO_MODER_MODER14_0;
+// GPIOD -> OTYPER &= ~ (GPIO_OTYPER_OT_14);
+// GPIOD -> OSPEEDR |= GPIO_OSPEEDER_OSPEEDR14;
+// GPIOD -> PUPDR &= ~ (GPIO_PUPDR_PUPDR14);
+
+	// GPIOD -> BSRRL = GPIO_BSRR_BS_14;
+	// LED_PORT->BSRRL = LED_P;
+	// GPIOD -> BSRRH = GPIO_BSRR_BS_14;
+
+	matrix_init();
 	setupRGBMatrixPorts();
 
-	LED_PORT->BRR = LED_P;
-
 	// precalculate the gamma lookup table
-	for (int i = 0; i < 256; i++) gammaTable[i] = 255 * pow((i / 256.0), 1.6);
+	int i=0;
+	for (; i < 256; i++) gammaTable[i] = 255 * pow((i / 256.0), 1.6);
 
 	// clear framebuffers
 	memset(bufferA, 0, sizeof(bufferA));
@@ -41,7 +58,7 @@ int main() {
 		displayBuffer(bufferA);
 	}
 
-	LED_PORT->BSRR = LED_P;
+	LED_PORT->BSRRL = LED_P;
 
 	uint32_t* currentBuffer = bufferA;
 	uint32_t* srcBuffer = bufferA;
@@ -108,18 +125,17 @@ void randomizeFramebuffer(uint32_t buffer[]) {
  */
 void setRow(int row) {
 	// todo: perhaps a lookup table could give us a tiny boost here.
+	if (row & 0b0001) GPIOE->BSRRL = MTX_PA;
+	else GPIOE->BSRRH = MTX_PA;
 
-	if (row & 0b0001) MTX_PORT->BSRR = MTX_PA;
-	else MTX_PORT->BRR = MTX_PA;
+	if (row & 0b0010) GPIOE->BSRRL = MTX_PB;
+	else GPIOE->BSRRH = MTX_PB;
 
-	if (row & 0b0010) MTX_PORT->BSRR = MTX_PB;
-	else MTX_PORT->BRR = MTX_PB;
+	if (row & 0b0100) GPIOE->BSRRL = MTX_PC;
+	else GPIOE->BSRRH = MTX_PC;
 
-	if (row & 0b0100) MTX_PORT->BSRR = MTX_PC;
-	else MTX_PORT->BRR = MTX_PC;
-
-	if (row & 0b1000) MTX_PORT->BSRR = MTX_PD;
-	else MTX_PORT->BRR = MTX_PD;
+	if (row & 0b1000) GPIOE->BSRRL = MTX_PD;
+	else GPIOE->BSRRH = MTX_PD;
 }
 
 /**
@@ -129,23 +145,23 @@ void setRGB(uint32_t rgb1, uint32_t rgb2, uint8_t plane) {
 	// using bitshifting seems to be faster due to gcc optimization
 	// than using a bitmask lookup table here.
 
-	if (rgb1 & (1 << plane))        MTX_PORT->BSRR = MTX_PR0;
-	else                            MTX_PORT->BRR  = MTX_PR0;
+	if (rgb1 & (1 << plane))        MTX_PORT->BSRRL = MTX_PR0;
+	else                            MTX_PORT->BSRRH  = MTX_PR0;
 
-	if (rgb1 & (1 << (plane + 8))) 	MTX_PORT->BSRR = MTX_PG0;
-	else                            MTX_PORT->BRR  = MTX_PG0;
+	if (rgb1 & (1 << (plane + 8))) 	MTX_PORT->BSRRL = MTX_PG0;
+	else                            MTX_PORT->BSRRH  = MTX_PG0;
 
-	if (rgb1 & (1 << (plane + 16))) MTX_PORT->BSRR = MTX_PB0;
-	else                            MTX_PORT->BRR  = MTX_PB0;
+	if (rgb1 & (1 << (plane + 16))) MTX_PORT->BSRRL = MTX_PB0;
+	else                            MTX_PORT->BSRRH  = MTX_PB0;
 
-	if (rgb2 & (1 << plane))        MTX_PORT->BSRR = MTX_PR1;
-	else                            MTX_PORT->BRR  = MTX_PR1;
+	if (rgb2 & (1 << plane))        MTX_PORT->BSRRL = MTX_PR1;
+	else                            MTX_PORT->BSRRH  = MTX_PR1;
 
-	if (rgb2 & (1 << (plane + 8))) 	MTX_PORT->BSRR = MTX_PG1;
-	else                            MTX_PORT->BRR  = MTX_PG1;
+	if (rgb2 & (1 << (plane + 8))) 	MTX_PORT->BSRRL = MTX_PG1;
+	else                            MTX_PORT->BSRRH  = MTX_PG1;
 
-	if (rgb2 & (1 << (plane + 16))) MTX_PORT->BSRR = MTX_PB1;
-	else                            MTX_PORT->BRR  = MTX_PB1;
+	if (rgb2 & (1 << (plane + 16))) MTX_PORT->BSRRL = MTX_PB1;
+	else                            MTX_PORT->BSRRH  = MTX_PB1;
 }
 
 
@@ -155,7 +171,7 @@ void setRGB(uint32_t rgb1, uint32_t rgb2, uint8_t plane) {
 void showLine(int amount) {
 	STROBE;
 	DISP_ON;
-	for (int c=0; c<amount; c++) asm("nop");
+	for (int c=0; c<amount; c++) __ASM("nop");
 	DISP_OFF;
 }
 
@@ -216,17 +232,38 @@ CellAction analyzeCell(int offset, uint32_t buffer[]){
 	       COPY;
 }
 
+void matrix_init(){
+	static GPIO_InitTypeDef GPIO_InitStructure;
+	// GPIO_CONTROL_CLOCKCMD(ENABLE);
+	RCC_AHB1PeriphClockCmd( RCC_CONTROL, ENABLE);                        // enable LED GPIO port
+
+	//Pinmode
+	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Speed = GPIO_High_Speed;
+	//For control, only row and control pins
+	GPIO_InitStructure.GPIO_Pin   = MTX_PA | MTX_PB | MTX_PC | MTX_PD;
+	GPIO_Init(GPIO_CONTROL, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = MTX_PSTB | MTX_POE | MTX_PCLK;      // Strobe, OutputEnable, Clock
+	GPIO_Init(GPIO_CONTROL, &GPIO_InitStructure);
+	// GPIO_InitStructure.GPIO_Pin = (((int)(8 - 1))<<2)|GPIO_Pin_STB;
+	// GPIO_InitStructure.GPIO_Pin = (uint16_t)(0x111100)|GPIO_Pin_STB;
+
+}
+
+
 void setupRGBMatrixPorts() {
-	GPIO_InitTypeDef GPIO_InitStructure;
+	static GPIO_InitTypeDef GPIO_InitStructure;
+	RCC_AHB1PeriphClockCmd(MTX_RCCPB, ENABLE);                        // enable matrix GPIO port
+	RCC_AHB1PeriphClockCmd(LED_RCCPB, ENABLE);                        // enable LED GPIO port
+	// RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);              // enable AFIO module, needed to release (remap the AlternateFunction) the JTAG Pins
 
-	RCC_APB2PeriphClockCmd(MTX_RCCPB, ENABLE);                        // enable matrix GPIO port
-	RCC_APB2PeriphClockCmd(LED_RCCPB, ENABLE);                        // enable LED GPIO port
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);              // enable AFIO module, needed to release (remap the AlternateFunction) the JTAG Pins
-
-	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE); 					// disable JTAG Debugging, we only need SWD. Releases PB3 and PB4
+	// GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE); 					// disable JTAG Debugging, we only need SWD. Releases PB3 and PB4
 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 
 	GPIO_InitStructure.GPIO_Pin = MTX_PR0 | MTX_PG0 | MTX_PB0;        // RGB0
 	GPIO_Init(MTX_PORT, &GPIO_InitStructure);
@@ -234,14 +271,40 @@ void setupRGBMatrixPorts() {
 	GPIO_InitStructure.GPIO_Pin = MTX_PR1 | MTX_PG1 | MTX_PB1;        // RGB1
 	GPIO_Init(MTX_PORT, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = MTX_PA | MTX_PB | MTX_PC | MTX_PD;  // ABCD
+	GPIO_InitStructure.GPIO_Pin =  MTX_PCLK;      // Strobe, OutputEnable, Clock
 	GPIO_Init(MTX_PORT, &GPIO_InitStructure);
+	// GPIO_InitStructure.GPIO_Pin = MTX_PA | MTX_PB | MTX_PC | MTX_PD;  // ABCD
+	// GPIO_Init(MTX_PORT, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = MTX_PSTB | MTX_POE | MTX_PCLK;      // Strobe, OutputEnable, Clock
-	GPIO_Init(MTX_PORT, &GPIO_InitStructure);
+	// GPIO_InitStructure.GPIO_Pin = MTX_PSTB | MTX_POE | MTX_PCLK;      // Strobe, OutputEnable, Clock
+	// GPIO_Init(MTX_PORT, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = LED_P;                              // Status LED
+
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_OUT;
+	// GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Speed = GPIO_High_Speed;
+	GPIO_InitStructure.GPIO_Pin   = MTX_POE;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	// GPIO_PinAFConfig(GPIOC, GPIO_PinSource6, GPIO_AF_TIM3);  //Output compare OutputEnable
+	GPIOC -> BSRRH = MTX_POE;
+
+
+	GPIO_InitStructure.GPIO_Pin = LED_P | GPIO_Pin_12;                              // Status LED
 	GPIO_Init(LED_PORT, &GPIO_InitStructure);
+
+	for(int cnt=0;cnt < 50;cnt++){
+		LED_PORT->BSRRL = LED_P;
+	    showLine(400000);
+		LED_PORT->BSRRH = LED_P;
+	    showLine(400000);
+		cnt++;
+	 }
+	 LED_PORT -> BSRRL = GPIO_Pin_12;
+
+
 }
 
 

@@ -9,7 +9,9 @@
 #include "matrix_config.h"
 
 const int waits[] = { 5, 10, 20, 40, 80, 160, 320, 640 };
-const int scan = MATRIX_HEIGHT / 2;
+// const int scan = MATRIX_HEIGHT / 2;
+// int scan = MATRIX_HEIGHT / 2;
+#define SCAN_ROWS 4
 uint8_t gammaTable[256];
 uint32_t bufferA[MATRIX_SIZE];
 uint32_t bufferB[MATRIX_SIZE];
@@ -22,14 +24,36 @@ void WaitaMoment (int time)
 for (; time > 0; time--);
 }
 
+int display_test_scan(int j){
+	j = (j+1)%3;
+	int L = sizeof(bufferA)/ sizeof(bufferA[0]);
+	for (int i=0; i< L ; i++){
+		if (i==0){
+		bufferA[L-1]=0;
+		}else{
+		bufferA[i-1]=0;
+		}
+		if (j==0){
+			bufferA[i] = 0x0050;
+		}else if(j==1){
+			bufferA[i] = 0x5000;
+		}else if(j==2){
+			bufferA[i] = 0x500000;
+			// bufferA[i] = 0x505050;
+		}
+		for (int j=0; j<5; j++) displayBuffer(bufferA);
+		// showLine(10000000);
+	}
+	return j;
+}
 
 int main() {
 
-// RCC -> AHB1ENR |= RCC_AHB1ENR_GPIODEN;
-// GPIOD -> MODER |= GPIO_MODER_MODER14_0;
-// GPIOD -> OTYPER &= ~ (GPIO_OTYPER_OT_14);
-// GPIOD -> OSPEEDR |= GPIO_OSPEEDER_OSPEEDR14;
-// GPIOD -> PUPDR &= ~ (GPIO_PUPDR_PUPDR14);
+	// RCC -> AHB1ENR |= RCC_AHB1ENR_GPIODEN;
+	// GPIOD -> MODER |= GPIO_MODER_MODER14_0;
+	// GPIOD -> OTYPER &= ~ (GPIO_OTYPER_OT_14);
+	// GPIOD -> OSPEEDR |= GPIO_OSPEEDER_OSPEEDR14;
+	// GPIOD -> PUPDR &= ~ (GPIO_PUPDR_PUPDR14);
 
 	// GPIOD -> BSRRL = GPIO_BSRR_BS_14;
 	// LED_PORT->BSRRL = LED_P;
@@ -39,24 +63,17 @@ int main() {
 	setupRGBMatrixPorts();
 
 	// precalculate the gamma lookup table
-	int i=0;
-	for (; i < 256; i++) gammaTable[i] = 255 * pow((i / 256.0), 1.6);
+	for (int i=0; i < 256; i++) gammaTable[i] = 255 * pow((i / 256.0), 1.6);
 
 	// clear framebuffers
 	memset(bufferA, 0, sizeof(bufferA));
 	memset(bufferB, 0, sizeof(bufferB));
 
 
-	// test pattern, light up a led in each corner
-	bufferA[0]    = 0x00000050;
-	bufferA[31]   = 0x00005000;
-	bufferA[992]  = 0x00500000;
-	bufferA[1023] = 0x00505000;
+	// test animation. showing the scanning pattern 
+	int j=-1;
+	while(1){ j = display_test_scan(j);}
 
-	// display test pattern for 500 frames
-	for (int i = 0; i < 100; i++) {
-		displayBuffer(bufferA);
-	}
 
 	LED_PORT->BSRRL = LED_P;
 
@@ -90,33 +107,47 @@ int main() {
 /**
  * Displays the buffer on the display using binary encoding (PWM equivalent).
  */
+
 void displayBuffer(uint32_t buffer[]) {
-	for (int s=0; s<scan; s++){
+	// GPIOE->BSRRH = MTX_PSTB;
+	for (int s=0; s<SCAN_ROWS; s++){
+	// for (int s=scan-1; s>-1; s--){
+		// s = scan-1-s;
 		setRow(s);
-		int offset1 = MATRIX_WIDTH * s;
-		int offset2 = MATRIX_WIDTH * (s+scan);
+		// scan -1 -s);
+		int offset1 = MATRIX_WIDTH * 2 * s;
+		int offset2 = MATRIX_WIDTH * 2 * (s+SCAN_ROWS);
+		// STROBE;
 		for (int plane=0; plane < 8; plane ++) {
-			for (int x=0; x<MATRIX_WIDTH; x++) {
-				setRGB(buffer[offset1+x], buffer[offset2+x], plane);
+
+			for (int x=0; x<MATRIX_WIDTH * 2; x++) {
+				// setRGB( buffer[offset1+x], buffer[offset2+x], plane);
+				setRGB( buffer[offset1+x],  buffer[offset2+x], plane);
 				CLK_TOGGLE;
+
 			}
+
+			// for (int x=0; x<32; x++) {
+			// 	CLK_TOGGLE;
+			// }
+
+
+			// for (int x= 33; x<36; x++) {
+			// 	setRGB( buffer[offset1+x], buffer[offset2+x], plane);
+			// 	CLK_TOGGLE;
+			// }
+
+			// int amount = waits[plane];
+			// // int amount = 10;
+			// STROBE;
+			// DISP_ON;
+			// for (int c=0; c<amount; c++) __ASM("nop");
+			// DISP_OFF;			
 			showLine(waits[plane]);
 		}
 	}
-}
-
-/**
- * generates some random junk for testing on the framebuffer.
- */
-void randomizeFramebuffer(uint32_t buffer[]) {
-
-	for (int i = 0; i < MATRIX_SIZE; i++) {
-		buffer[i] = 0x00
-			| ((gammaTable[rand() % 255]) << 0)
-			| ((gammaTable[rand() % 255]) << 8)
-			| ((gammaTable[rand() % 255]) << 16)
-			| ((rand() % 255) << 24);
-	}
+	// GPIOE->BSRRH = MTX_PSTB;
+	// GPIOE->BSRRL = MTX_PSTB;
 }
 
 
@@ -146,22 +177,22 @@ void setRGB(uint32_t rgb1, uint32_t rgb2, uint8_t plane) {
 	// than using a bitmask lookup table here.
 
 	if (rgb1 & (1 << plane))        MTX_PORT->BSRRL = MTX_PR0;
-	else                            MTX_PORT->BSRRH  = MTX_PR0;
+	else                            MTX_PORT->BSRRH = MTX_PR0;
 
 	if (rgb1 & (1 << (plane + 8))) 	MTX_PORT->BSRRL = MTX_PG0;
-	else                            MTX_PORT->BSRRH  = MTX_PG0;
+	else                            MTX_PORT->BSRRH = MTX_PG0;
 
 	if (rgb1 & (1 << (plane + 16))) MTX_PORT->BSRRL = MTX_PB0;
-	else                            MTX_PORT->BSRRH  = MTX_PB0;
+	else                            MTX_PORT->BSRRH = MTX_PB0;
 
 	if (rgb2 & (1 << plane))        MTX_PORT->BSRRL = MTX_PR1;
-	else                            MTX_PORT->BSRRH  = MTX_PR1;
+	else                            MTX_PORT->BSRRH = MTX_PR1;
 
 	if (rgb2 & (1 << (plane + 8))) 	MTX_PORT->BSRRL = MTX_PG1;
-	else                            MTX_PORT->BSRRH  = MTX_PG1;
+	else                            MTX_PORT->BSRRH = MTX_PG1;
 
 	if (rgb2 & (1 << (plane + 16))) MTX_PORT->BSRRL = MTX_PB1;
-	else                            MTX_PORT->BSRRH  = MTX_PB1;
+	else                            MTX_PORT->BSRRH = MTX_PB1;
 }
 
 
@@ -175,8 +206,22 @@ void showLine(int amount) {
 	DISP_OFF;
 }
 
+/**
+ * generates some random junk for testing on the framebuffer.
+ */
+void randomizeFramebuffer(uint32_t buffer[]) {
+
+	for (int i = 0; i < MATRIX_SIZE; i++) {
+		buffer[i] = 0x00
+			| ((gammaTable[rand() % 255]) << 0)
+			| ((gammaTable[rand() % 255]) << 8)
+			| ((gammaTable[rand() % 255]) << 16)
+			| ((rand() % 255) << 24);
+	}
+}
+
 void processBuffer(uint32_t src[], uint32_t dst[]){
-	// apply GOF rules on src and store result in dst.
+	// apply GOL rules on src and store result in dst.
 	for (int i=0; i<MATRIX_SIZE; i++){
 		CellAction action = analyzeCell(i,src);
 		if (COPY == action ){
@@ -295,7 +340,7 @@ void setupRGBMatrixPorts() {
 	GPIO_InitStructure.GPIO_Pin = LED_P | GPIO_Pin_12;                              // Status LED
 	GPIO_Init(LED_PORT, &GPIO_InitStructure);
 
-	for(int cnt=0;cnt < 50;cnt++){
+	for(int cnt=0;cnt < 10;cnt++){
 		LED_PORT->BSRRL = LED_P;
 	    showLine(400000);
 		LED_PORT->BSRRH = LED_P;

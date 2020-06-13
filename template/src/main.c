@@ -17,6 +17,17 @@ uint32_t bufferA[MATRIX_SIZE];
 uint32_t bufferB[MATRIX_SIZE];
 uint32_t birthRate = 0;
 
+
+#define X 0x50
+
+// 64 * 5;
+uint32_t testBuffer[MATRIX_SIZE] = {
+	0,0,0,0, X,0,0,X, X,X,X,X, X,0,0,0,  X,0,0,0, 0,X,X,0, X,0,0,0, X,0,0,0,  0,0,0,X, 0,0,0,X, 0,X,X,0, X,X,X,0,  X,0,0,0, X,X,X,0, 0,0,0,0, 0,0,0,0,
+	0,0,0,0, X,0,0,X, X,0,0,0, X,0,0,0,  X,0,0,0, X,0,0,X, X,0,X,0, X,0,0,0,  0,0,0,X, 0,X,0,X, X,0,0,X, X,0,0,X,  X,0,0,0, X,0,0,X, 0,0,0,0, 0,0,0,0,
+	0,0,0,0, X,X,X,X, X,X,X,X, X,0,0,0,  X,0,0,0, X,0,0,X, X,0,X,0, X,0,0,0,  0,0,0,X, 0,X,0,X, X,0,0,X, X,X,X,0,  X,0,0,0, X,0,0,X, 0,0,0,0, 0,0,0,0,
+	0,0,0,0, X,0,0,X, X,0,0,0, X,0,0,0,  X,0,0,0, X,0,0,X, X,0,X,0, X,0,0,0,  0,0,0,X, 0,X,0,X, X,0,0,X, X,0,X,0,  X,0,0,0, X,0,0,X, 0,0,0,0, 0,0,0,0,
+	0,0,0,0, X,0,0,X, X,X,X,X, X,X,X,X,  X,X,X,X, 0,X,X,0, 0,X,0,X, 0,0,0,0,  0,0,0,0, X,0,X,0, 0,X,X,0, X,0,0,X,  X,X,X,X, X,X,X,0, 0,0,0,0, 0,0,0,0,
+};
 // ----- Timing definitions -------------------------------------------------
 
 void WaitaMoment (int time)
@@ -34,11 +45,11 @@ int display_test_scan(int j){
 		bufferA[i-1]=0;
 		}
 		if (j==0){
-			bufferA[i] = 0x0050;
+			bufferA[i] = 0x50;
 		}else if(j==1){
-			bufferA[i] = 0x5000;
+			bufferA[i] = 0x50 << 8;
 		}else if(j==2){
-			bufferA[i] = 0x500000;
+			bufferA[i] = 0x50 << 16;
 			// bufferA[i] = 0x505050;
 		}
 		for (int j=0; j<5; j++) displayBuffer(bufferA);
@@ -71,8 +82,23 @@ int main() {
 
 
 	// test animation. showing the scanning pattern 
+	
 	int j=-1;
-	while(1){ j = display_test_scan(j);}
+	// while(1){ j = display_test_scan(j);}
+
+	// bufferA[0] = 0x50;
+	// bufferA[MATRIX_SIZE-1] = 0x50<<8;
+	// while(1){displayBuffer(bufferA);}
+
+	for (int i=0; i<MATRIX_SIZE; i++){
+		int c  = (i/16)%3;
+		int brt= (i%16 )*5;
+		bufferA[i] = gammaTable[brt] << (c*8);
+
+	}
+	// memset(bufferA, 0, sizeof(bufferA));
+	memcpy(bufferA, testBuffer, sizeof(bufferA));
+	while(1){displayBuffer(bufferA);}
 
 
 	LED_PORT->BSRRL = LED_P;
@@ -126,23 +152,7 @@ void displayBuffer(uint32_t buffer[]) {
 				CLK_TOGGLE;
 
 			}
-
-			// for (int x=0; x<32; x++) {
-			// 	CLK_TOGGLE;
-			// }
-
-
-			// for (int x= 33; x<36; x++) {
-			// 	setRGB( buffer[offset1+x], buffer[offset2+x], plane);
-			// 	CLK_TOGGLE;
-			// }
-
-			// int amount = waits[plane];
-			// // int amount = 10;
-			// STROBE;
-			// DISP_ON;
-			// for (int c=0; c<amount; c++) __ASM("nop");
-			// DISP_OFF;			
+			// binary code modulation delay
 			showLine(waits[plane]);
 		}
 	}

@@ -3,6 +3,8 @@
 
 typedef enum { KILL, COPY, NEW } CellAction;
 
+void initTestBuffer(void);
+void CanvasToBuffer(uint32_t* destBuffer, uint32_t* srcBuffer, int width);
 void matrix_init(void);
 void setupRGBMatrixPorts(void);
 void displayBuffer(uint32_t buffer[]);

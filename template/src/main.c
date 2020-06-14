@@ -7,7 +7,7 @@
 #include "stdlib.h"
 #include "main.h"
 #include "matrix_config.h"
-
+#define MIN(x,y) (x<y)?x:y;
 const int waits[] = { 5, 10, 20, 40, 80, 160, 320, 640 };
 // const int scan = MATRIX_HEIGHT / 2;
 // int scan = MATRIX_HEIGHT / 2;
@@ -21,13 +21,217 @@ uint32_t birthRate = 0;
 #define X 0x50
 
 // 64 * 5;
-uint32_t testBuffer[MATRIX_SIZE] = {
-	0,0,0,0, X,0,0,X, X,X,X,X, X,0,0,0,  X,0,0,0, 0,X,X,0, X,0,0,0, X,0,0,0,  0,0,0,X, 0,0,0,X, 0,X,X,0, X,X,X,0,  X,0,0,0, X,X,X,0, 0,0,0,0, 0,0,0,0,
-	0,0,0,0, X,0,0,X, X,0,0,0, X,0,0,0,  X,0,0,0, X,0,0,X, X,0,X,0, X,0,0,0,  0,0,0,X, 0,X,0,X, X,0,0,X, X,0,0,X,  X,0,0,0, X,0,0,X, 0,0,0,0, 0,0,0,0,
-	0,0,0,0, X,X,X,X, X,X,X,X, X,0,0,0,  X,0,0,0, X,0,0,X, X,0,X,0, X,0,0,0,  0,0,0,X, 0,X,0,X, X,0,0,X, X,X,X,0,  X,0,0,0, X,0,0,X, 0,0,0,0, 0,0,0,0,
-	0,0,0,0, X,0,0,X, X,0,0,0, X,0,0,0,  X,0,0,0, X,0,0,X, X,0,X,0, X,0,0,0,  0,0,0,X, 0,X,0,X, X,0,0,X, X,0,X,0,  X,0,0,0, X,0,0,X, 0,0,0,0, 0,0,0,0,
-	0,0,0,0, X,0,0,X, X,X,X,X, X,X,X,X,  X,X,X,X, 0,X,X,0, 0,X,0,X, 0,0,0,0,  0,0,0,0, X,0,X,0, 0,X,X,0, X,0,0,X,  X,X,X,X, X,X,X,0, 0,0,0,0, 0,0,0,0,
-};
+
+// uint32_t testBuffer[MATRIX_SIZE] = {
+// 	0,0,0,0, X,0,0,X, X,X,X,X, X,0,0,0,  X,0,0,0, 0,X,X,0, 0,0,0,0, 0,0,0,0,  0,0,0,X, 0,0,0,X, 0,X,X,0, X,X,X,0,  X,0,0,0, X,X,X,0, 0,0,0,0, 0,0,0,0,
+// 	0,0,0,0, X,0,0,X, X,0,0,0, X,0,0,0,  X,0,0,0, X,0,0,X, 0,0,0,0, 0,0,0,0,  0,0,0,X, 0,X,0,X, X,0,0,X, X,0,0,X,  X,0,0,0, X,0,0,X, 0,0,0,0, 0,0,0,0,
+// 	0,0,0,0, X,X,X,X, X,X,X,X, X,0,0,0,  X,0,0,0, X,0,0,X, 0,0,0,0, 0,0,0,0,  0,0,0,X, 0,X,0,X, X,0,0,X, X,X,X,0,  X,0,0,0, X,0,0,X, 0,0,0,0, 0,0,0,0,
+// 	0,0,0,0, X,0,0,X, X,0,0,0, X,0,0,0,  X,0,0,0, X,0,0,X, 0,0,0,0, 0,0,0,0,  0,0,0,X, 0,X,0,X, X,0,0,X, X,0,X,0,  X,0,0,0, X,0,0,X, 0,0,0,0, 0,0,0,0,
+// 	0,0,0,0, X,0,0,X, X,X,X,X, X,X,X,X,  X,X,X,X, 0,X,X,0, 0,0,0,0, 0,0,0,0,  0,0,0,0, X,0,X,0, 0,X,X,0, X,0,0,X,  X,X,X,X, X,X,X,0, 0,0,0,0, 0,0,0,0,
+// };
+uint32_t testBufferTranslated[MATRIX_SIZE] = {0};
+// uint32_t testBuffer[MATRIX_SIZE] = {
+// 	0,0,0,0,0, 0,X,0,0,X, 0,X,X,X,X, 0,X,0,0,0, 0,X,0,0,0, 0,0,X,X,0, 
+// 	0,0,0,0,0, 0,X,0,0,X, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,X, 
+// 	0,0,0,0,0, 0,X,X,X,X, 0,X,X,X,X, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,X, 
+// 	0,0,0,0,0, 0,X,0,0,X, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,X, 
+// 	0,0,0,0,0, 0,X,0,0,X, 0,X,X,X,X, 0,X,X,X,X, 0,X,X,X,X, 0,0,X,X,0, 
+// 	0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 
+// 	0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 
+// 	0,0,0,0,0, X,0,0,0,X, 0,0,X,X,0, 0,X,X,X,0, 0,X,0,0,0, 0,X,X,X,0, 
+// 	0,0,0,0,0, X,0,X,0,X, 0,X,0,0,X, 0,X,0,0,X, 0,X,0,0,0, 0,X,0,0,X, 
+// 	0,0,0,0,0, X,0,X,0,X, 0,X,0,0,X, 0,X,X,X,0, 0,X,0,0,0, 0,X,0,0,X, 
+// 	0,0,0,0,0, X,0,X,0,X, 0,X,0,0,X, 0,X,0,X,0, 0,X,0,0,0, 0,X,0,0,X, 
+// 	0,0,0,0,0, 0,X,0,X,0, 0,0,X,X,0, 0,X,0,0,X, 0,X,X,X,X, 0,X,X,X,0, 
+// };
+// int bufferWidth = 30;
+
+// uint32_t testBuffer[MATRIX_SIZE] = {
+// 	0,X,0,0,X, 0,X,X,X,X, 0,X,0,0,0, 0,X,0,0,0, 0,0,X,X,0, 0,0,X,0,0, X,0,0,0,X, 0,0,X,X,0, 0,X,X,X,0, 0,X,0,0,0, 0,X,X,X,0, 0,0,0,0,0, 
+// 	0,X,0,0,X, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,X, 0,0,0,X,0, X,0,X,0,X, 0,X,0,0,X, 0,X,0,0,X, 0,X,0,0,0, 0,X,0,0,X, 0,0,0,0,0, 
+// 	0,X,X,X,X, 0,X,X,X,X, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,X, X,X,X,X,X, X,0,X,0,X, 0,X,0,0,X, 0,X,X,X,0, 0,X,0,0,0, 0,X,0,0,X, 0,0,0,0,0, 
+// 	0,X,0,0,X, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,X, 0,0,0,X,0, X,0,X,0,X, 0,X,0,0,X, 0,X,0,X,0, 0,X,0,0,0, 0,X,0,0,X, 0,0,0,0,0, 
+// 	0,X,0,0,X, 0,X,X,X,X, 0,X,X,X,X, 0,X,X,X,X, 0,0,X,X,0, 0,0,X,0,0, 0,X,0,X,0, 0,0,X,X,0, 0,X,0,0,X, 0,X,X,X,X, 0,X,X,X,0, 0,0,0,0,0, 
+// 	0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 
+// 	0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 
+// 	X,0,0,0,X, 0,0,X,X,0, 0,X,X,X,0, 0,X,0,0,0, 0,X,X,X,0, 0,0,0,0,0, 0,X,0,0,X, 0,X,X,X,X, 0,X,0,0,0, 0,X,0,0,0, 0,0,X,X,0, 0,0,0,0,0, 
+// 	X,0,X,0,X, 0,X,0,0,X, 0,X,0,0,X, 0,X,0,0,0, 0,X,0,0,X, 0,0,0,0,0, 0,X,0,0,X, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,X, 0,0,0,0,0, 
+// 	X,0,X,0,X, 0,X,0,0,X, 0,X,X,X,0, 0,X,0,0,0, 0,X,0,0,X, 0,0,0,0,0, 0,X,X,X,X, 0,X,X,X,X, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,X, 0,0,0,0,0, 
+// 	X,0,X,0,X, 0,X,0,0,X, 0,X,0,X,0, 0,X,0,0,0, 0,X,0,0,X, 0,0,0,0,0, 0,X,0,0,X, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,0, 0,X,0,0,X, 0,0,0,0,0, 
+// 	0,X,0,X,0, 0,0,X,X,0, 0,X,0,0,X, 0,X,X,X,X, 0,X,X,X,0, 0,0,0,0,0, 0,X,0,0,X, 0,X,X,X,X, 0,X,X,X,X, 0,X,X,X,X, 0,0,X,X,0, 0,0,0,0,0, 
+
+// };
+// int bufferWidth = 60;
+
+// Function to reverse elements of an array
+void reverse(uint32_t arr[], int low, int high)
+{
+	high = high-1;
+	for (;low< high;low++,high--)
+	// for (int low = 0, high = n - 1; low < high; low++, high--)
+	{
+		uint32_t temp = arr[low];
+		arr[low] = arr[high];
+		arr[high] = temp;
+	}
+}
+
+
+/*
+ Failed implementation
+*/
+// void snakeCopy(uint32_t* destBuffer, uint32_t* srcBuffer, int wcan, int hcan){
+// 	int nW = wcan  / 32;
+// 	int nH = hcan /  16;
+// 	int x = 0;
+// 	int y = 0;
+// 	uint32_t* ptr;
+// 	int toRight = 1;
+// 	for (int i =0; i< nW * nH; i++){
+// 		for (int yy=0; yy<16; yy++){
+// 			int destIndex = (i * 16 + yy)*32;
+// 			int destIndex = (destIndex % bufferWidth ) 
+// 			if(toRight){
+// 				memcpy( &destBuffer[destIndex], &srcBuffer[ x + wcan*(y+yy) ], 32 * sizeof(srcBuffer[0]));
+// 			}else{
+// 				memcpy( &destBuffer[destIndex], &srcBuffer[ x + wcan*(y+16-1-yy) ], 32 * sizeof(srcBuffer[0]));
+// 				reverse(destBuffer, destIndex, destIndex +32);
+// 			}
+// 		}
+// 		if (toRight){
+// 			if (x+32==wcan) {y+=16; toRight=0; }
+// 			else x+=32;
+// 			return;
+// 		}else{
+// 			if (x==0) y+=16, toRight=1;
+// 			else x-=32;
+// 		}
+// 	}
+// }
+
+void snakeCopy(uint32_t* destBuffer, uint32_t* srcBuffer, int wcan, int hcan){
+	int nW = wcan  / 32;
+	int nH = hcan /  16;
+	for (int h=0; h< nH; h++){
+		// int needInvert=(( h/16 )%2 )==1;		
+		memcpy( &destBuffer[h*16*wcan],  &srcBuffer[h*16*wcan],  16*wcan*sizeof(srcBuffer[0]));
+		// for(int hh=0; hh<16; hh++){
+		// }
+		return;
+	}
+}
+
+uint32_t testBuffer[MATRIX_SIZE]  = {0};
+int bufferWidth = 8 * N_SEGMENT;
+
+// void initTestBuffer(void){
+// 	// bufferWidth = 64;
+// 	int imageLength = 128;
+// 	for (int i =0; i<MATRIX_SIZE; i++){
+// 		int per = 27;
+// 		int c = ((x + 2 * y)/ per)%3;
+// 		int x = i % imageLength;
+// 		int y = i / imageLength;
+// 		// int x = i % bufferWidth;
+// 		// int y = i / bufferWidth;
+// 		testBuffer[i] = ((x + 2 * y)%per) << (8 * c);
+// 		// testBuffer[i] = (x + y)*3,255);
+// 	}
+
+// 	uint32_t tempBuffer[MATRIX_SIZE] = {0};
+// 	// memcpy(tempBuffer, testBuffer, sizeof(tempBuffer));
+// 	snakeCopy(tempBuffer, testBuffer, 64, 32);
+// 	CanvasToBuffer( testBufferTranslated, tempBuffer, bufferWidth);
+// 	// CanvasToBuffer( testBufferTranslated, testBuffer, bufferWidth);
+// 	// CanvasToBuffer( testBufferTranslated, testBuffer, 32);
+// }
+
+
+
+void setPanelPixel(uint32_t testBuffer[], int panelIndex, int x, int y, int reversed, uint32_t rgb){
+	if (reversed==0){
+		testBuffer[32*panelIndex + N_SEGMENT*8*y + x] = rgb;		
+	}else{
+		testBuffer[32*panelIndex + N_SEGMENT*8*15+32 - 1 - x - y * N_SEGMENT*8] = rgb;
+	}
+}
+void setMatrixPixel(uint32_t matrixBuffer[], int x, int y, uint32_t rgb){
+	// int panelIndex = ;
+	int xx = x / 32;
+	int yy = y / 16;
+	int reversed  = yy%2!=0;
+	int panelIndex;
+	if(reversed==0){
+		panelIndex = yy * N_PANEL_WIDTH + xx;
+	}else{
+		panelIndex = ( yy + 1 ) * N_PANEL_WIDTH - 1 - xx;
+	}
+	setPanelPixel(matrixBuffer, panelIndex, x%32, y%16, reversed, rgb);
+
+}
+
+// void initTestBuffer(void)
+// {
+// 	setMatrixPixel(testBuffer,0,0,X);
+// 	setMatrixPixel(testBuffer,0,1,X);
+// 	setMatrixPixel(testBuffer,2,0,X);
+// 	setMatrixPixel(testBuffer,32+0,  0,X);
+// 	setMatrixPixel(testBuffer,32+0,  1,X);
+// 	setMatrixPixel(testBuffer,32+2,  0,X);
+// 	// setMatrixPixel(testBuffer,32,   16, X);
+// 	// setMatrixPixel(testBuffer,32,   16+1, X);
+// 	// setMatrixPixel(testBuffer,32+2, 16+0, X);
+// 	setMatrixPixel(testBuffer,0    ,16+0,X);
+// 	setMatrixPixel(testBuffer,0    ,16+1,X);
+// 	setMatrixPixel(testBuffer,2    ,16+0,X);	
+// 	CanvasToBuffer( testBufferTranslated, testBuffer, bufferWidth);
+// }
+
+// void initTestBuffer(void){
+// 	setPanelPixel(testBuffer,0,0,0,0,X);
+// 	setPanelPixel(testBuffer,0,0,1,0,X);
+// 	setPanelPixel(testBuffer,0,2,0,0,X);
+
+// 	setPanelPixel(testBuffer,1,0,0,0,X);
+// 	setPanelPixel(testBuffer,1,0,1,0,X);
+// 	setPanelPixel(testBuffer,1,2,0,0,X);
+
+// 	setPanelPixel(testBuffer,2,0,0,1,X);
+// 	setPanelPixel(testBuffer,2,0,1,1,X);
+// 	setPanelPixel(testBuffer,2,2,0,1,X);
+
+// 	setPanelPixel(testBuffer,3,0,0,1,X);
+// 	setPanelPixel(testBuffer,3,0,1,1,X);
+// 	setPanelPixel(testBuffer,3,2,0,1,X);	
+// 	CanvasToBuffer( testBufferTranslated, testBuffer, bufferWidth);
+// }
+
+// void initTestBuffer(void){
+// 	for(int i=0; i<N_PANEL_WIDTH*32; i++) setMatrixPixel(testBuffer,i,0,X);
+// 	for(int i=0; i<N_PANEL_HEIGHT*16; i++) setMatrixPixel(testBuffer,0,i,X);
+	
+// 	CanvasToBuffer( testBufferTranslated, testBuffer, bufferWidth);
+// }
+
+
+void initTestBuffer(void){
+
+	for (int i =0; i<MATRIX_SIZE; i++){
+		int wid = ( N_PANEL_WIDTH * 32);
+		int x = i % wid;
+		int y = i / wid;
+
+		int per = 27;
+		int val =(x + 2 * y)%per;
+		int c = ((x + 2 * y) / per) % 3;
+		setMatrixPixel( testBuffer,  x,  y, (val )<<(c*8) );
+	}
+	uint32_t tempBuffer[MATRIX_SIZE] = {0};
+	memcpy(tempBuffer, testBuffer, sizeof(tempBuffer));
+	CanvasToBuffer( testBufferTranslated, tempBuffer, bufferWidth);
+}
+
+
 // ----- Timing definitions -------------------------------------------------
 
 void WaitaMoment (int time)
@@ -60,16 +264,8 @@ int display_test_scan(int j){
 
 int main() {
 
-	// RCC -> AHB1ENR |= RCC_AHB1ENR_GPIODEN;
-	// GPIOD -> MODER |= GPIO_MODER_MODER14_0;
-	// GPIOD -> OTYPER &= ~ (GPIO_OTYPER_OT_14);
-	// GPIOD -> OSPEEDR |= GPIO_OSPEEDER_OSPEEDR14;
-	// GPIOD -> PUPDR &= ~ (GPIO_PUPDR_PUPDR14);
 
-	// GPIOD -> BSRRL = GPIO_BSRR_BS_14;
-	// LED_PORT->BSRRL = LED_P;
-	// GPIOD -> BSRRH = GPIO_BSRR_BS_14;
-
+	initTestBuffer();
 	matrix_init();
 	setupRGBMatrixPorts();
 
@@ -97,7 +293,8 @@ int main() {
 
 	}
 	// memset(bufferA, 0, sizeof(bufferA));
-	memcpy(bufferA, testBuffer, sizeof(bufferA));
+	memcpy(bufferA, testBufferTranslated, sizeof(bufferA));
+	// memcpy(bufferA, testBuffer, sizeof(bufferA));
 	while(1){displayBuffer(bufferA);}
 
 
@@ -130,30 +327,60 @@ int main() {
 	}
 }
 
+/*
+Prepare a canvas array to displayBuffer,
+@param: 
+    destBuffer: displayBuffer
+    srcBuffer: 2d array with index=x + y * width 
+    width: width of srcBuffer
+*/
+void CanvasToBuffer(uint32_t* destBuffer, uint32_t* srcBuffer, int width){
+for(int i=0; i<MATRIX_SIZE; i++){
+	int x = i%width;
+	int y = i/width;
+	int h = y / 8 ;
+	int p = x % 8 + (y / 4) % 2 * 8;
+	int g = x / 8;
+	int s = y % N_SCAN;
+	int oi = p+ N_POSITION *(g+N_SEGMENT*(s+4*(h)));
+	destBuffer[oi] = srcBuffer[i];
+	}
+}
+
 /**
- * Displays the buffer on the display using binary encoding (PWM equivalent).
- */
-
+ * 
+	Displays the buffer on the display using binary encoding (PWM equivalent).
+	----
+	S: Scan
+	G: seGment
+	P: Position
+	H: HeightId
+	MATRIX_WIDTH = N_SEGMENT * 8	
+**/
 void displayBuffer(uint32_t buffer[]) {
-	// GPIOE->BSRRH = MTX_PSTB;
 	for (int s=0; s<SCAN_ROWS; s++){
-	// for (int s=scan-1; s>-1; s--){
-		// s = scan-1-s;
 		setRow(s);
-		// scan -1 -s);
-		int offset1 = MATRIX_WIDTH * 2 * s;
-		int offset2 = MATRIX_WIDTH * 2 * (s+SCAN_ROWS);
-		// STROBE;
-		for (int plane=0; plane < 8; plane ++) {
-
-			for (int x=0; x<MATRIX_WIDTH * 2; x++) {
-				// setRGB( buffer[offset1+x], buffer[offset2+x], plane);
-				setRGB( buffer[offset1+x],  buffer[offset2+x], plane);
-				CLK_TOGGLE;
-
+		for (int h=0; h<2; h++){
+			for (int plane=0; plane < 8; plane ++) {
+				for (int g=0; g < N_SEGMENT; g++){
+					// TODO: shiftDataForSegment( p, g, s,h)
+					for (int p=0; p < N_POSITION; p++) {
+						// TODO: shiftDataForPosition( p, g, s,h)
+						// setRGB( buffer[ p + N_POSITION * (g + N_SEGMENT * s) ],  0,  plane);
+						uint32_t v1 = buffer[ p + N_POSITION * (g + N_SEGMENT * (s + N_SCAN * h)) ];
+						// uint32_t v2 = buffer[ p + N_POSITION * (g + N_SEGMENT * s) ];
+						// setRGB1(v1,plane);
+						// setRGB2(v1,plane);
+						// if (h==1) setRGB1(v1,plane);
+						// else      setRGB2(v1,plane);
+						if (h==0)	setRGB(   v1,   0,  plane);
+						else 		setRGB(   0,   v1,  plane);
+						CLK_TOGGLE;
+					}
+				}
+				showLine(waits[plane]);
 			}
-			// binary code modulation delay
-			showLine(waits[plane]);
+			// binary code modulation del  ay
 		}
 	}
 	// GPIOE->BSRRH = MTX_PSTB;
@@ -179,13 +406,38 @@ void setRow(int row) {
 	else GPIOE->BSRRH = MTX_PD;
 }
 
+
+// void setRGB1(uint32_t rgb1, uint8_t plane){
+// 	if (rgb1 & (1 << plane))        MTX_PORT->BSRRL = MTX_PR0;
+// 	else                            MTX_PORT->BSRRH = MTX_PR0;
+
+// 	if (rgb1 & (1 << (plane + 8))) 	MTX_PORT->BSRRL = MTX_PG0;
+// 	else                            MTX_PORT->BSRRH = MTX_PG0;
+
+// 	if (rgb1 & (1 << (plane + 16))) MTX_PORT->BSRRL = MTX_PB0;
+// 	else                            MTX_PORT->BSRRH = MTX_PB0;	
+// }
+// void setRGB2(uint32_t rgb2, uint8_t plane) {
+// 	// using bitshifting seems to be faster due to gcc optimization
+// 	// than using a bitmask lookup table here.
+
+
+// 	if (rgb2 & (1 << plane))        MTX_PORT->BSRRL = MTX_PR1;
+// 	else                            MTX_PORT->BSRRH = MTX_PR1;
+
+// 	if (rgb2 & (1 << (plane + 8))) 	MTX_PORT->BSRRL = MTX_PG1;
+// 	else                            MTX_PORT->BSRRH = MTX_PG1;
+
+// 	if (rgb2 & (1 << (plane + 16))) MTX_PORT->BSRRL = MTX_PB1;
+// 	else                            MTX_PORT->BSRRH = MTX_PB1;
+// }
+
 /**
  * loads rgb1 and rgb2 gpio ports with the given bitplane
  */
-void setRGB(uint32_t rgb1, uint32_t rgb2, uint8_t plane) {
+void setRGB(uint32_t rgb1, uint32_t rgb2, uint8_t plane){
 	// using bitshifting seems to be faster due to gcc optimization
-	// than using a bitmask lookup table here.
-
+	// than using a bitmask lookup table here.	
 	if (rgb1 & (1 << plane))        MTX_PORT->BSRRL = MTX_PR0;
 	else                            MTX_PORT->BSRRH = MTX_PR0;
 
@@ -193,7 +445,10 @@ void setRGB(uint32_t rgb1, uint32_t rgb2, uint8_t plane) {
 	else                            MTX_PORT->BSRRH = MTX_PG0;
 
 	if (rgb1 & (1 << (plane + 16))) MTX_PORT->BSRRL = MTX_PB0;
-	else                            MTX_PORT->BSRRH = MTX_PB0;
+	else                            MTX_PORT->BSRRH = MTX_PB0;	
+	// using bitshifting seems to be faster due to gcc optimization
+	// than using a bitmask lookup table here.
+
 
 	if (rgb2 & (1 << plane))        MTX_PORT->BSRRL = MTX_PR1;
 	else                            MTX_PORT->BSRRH = MTX_PR1;
@@ -204,8 +459,6 @@ void setRGB(uint32_t rgb1, uint32_t rgb2, uint8_t plane) {
 	if (rgb2 & (1 << (plane + 16))) MTX_PORT->BSRRL = MTX_PB1;
 	else                            MTX_PORT->BSRRH = MTX_PB1;
 }
-
-
 /**
  * strobes / shows a line for a n*nop amount of time.
  */

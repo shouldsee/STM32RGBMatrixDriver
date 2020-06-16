@@ -1,0 +1,8 @@
+- - __version__
+  - 0.0.8
+- - __class__.__name__
+  - TimeSizeStampRule
+- - to_ident
+  - - /data/repos/stm32/STM32RGBMatrixDriver/template/src/matrix_config.h
+    - 1592147796.1884806
+    - 1486

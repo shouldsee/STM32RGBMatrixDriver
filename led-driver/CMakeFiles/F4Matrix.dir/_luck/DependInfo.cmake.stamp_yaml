@@ -1,0 +1,8 @@
+- - __version__
+  - 0.0.8
+- - __class__.__name__
+  - TimeSizeStampRule
+- - to_ident
+  - - /data/repos/stm32/STM32RGBMatrixDriver/template/CMakeFiles/F4Matrix.dir/DependInfo.cmake
+    - 1592279966.9336283
+    - 3906

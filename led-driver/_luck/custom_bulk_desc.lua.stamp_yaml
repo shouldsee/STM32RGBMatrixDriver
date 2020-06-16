@@ -1,0 +1,8 @@
+- - __version__
+  - 0.0.8
+- - __class__.__name__
+  - TimeSizeStampRule
+- - to_ident
+  - - /data/repos/stm32/STM32RGBMatrixDriver/template/custom_bulk_desc.lua
+    - 1592279731.9980328
+    - 414

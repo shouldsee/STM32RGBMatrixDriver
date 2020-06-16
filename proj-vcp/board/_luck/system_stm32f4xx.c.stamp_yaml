@@ -1,0 +1,8 @@
+- - __version__
+  - 0.0.8
+- - __class__.__name__
+  - TimeSizeStampRule
+- - to_ident
+  - - board/system_stm32f4xx.c
+    - 1592283257.4054017
+    - 27053

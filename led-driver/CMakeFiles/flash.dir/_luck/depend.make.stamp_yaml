@@ -1,0 +1,8 @@
+- - __version__
+  - 0.0.8
+- - __class__.__name__
+  - TimeSizeStampRule
+- - to_ident
+  - - /data/repos/stm32/STM32RGBMatrixDriver/template/CMakeFiles/flash.dir/depend.make
+    - 1591943917.1389925
+    - 99

@@ -1,0 +1,8 @@
+- - __version__
+  - 0.0.8
+- - __class__.__name__
+  - TimeSizeStampRule
+- - to_ident
+  - - /data/repos/stm32/STM32RGBMatrixDriver/template/board/stm32f4xx_hal_conf.h
+    - 1592279722.0249722
+    - 16847

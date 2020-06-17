@@ -1,0 +1,8 @@
+- - __version__
+  - 0.0.8
+- - __class__.__name__
+  - TimeSizeStampRule
+- - to_ident
+  - - /data/repos/stm32/TeenyUSB/usb_stack/inc/teeny_usb_platform.h
+    - 1592272504.9521713
+    - 4226

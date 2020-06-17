@@ -1,0 +1,5 @@
+/data/local/repos/stm32/STM32RGBMatrixDriver/led-driver/CMakeFiles/edit_cache.dir
+/data/local/repos/stm32/STM32RGBMatrixDriver/led-driver/CMakeFiles/flash.dir
+/data/local/repos/stm32/STM32RGBMatrixDriver/led-driver/CMakeFiles/F4Matrix.dir
+/data/local/repos/stm32/STM32RGBMatrixDriver/led-driver/CMakeFiles/F4Matrix.bin.dir
+/data/local/repos/stm32/STM32RGBMatrixDriver/led-driver/CMakeFiles/rebuild_cache.dir

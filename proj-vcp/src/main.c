@@ -27,24 +27,20 @@ int waitCycles(int wait){
 int main(void) {
     uint8_t c;
     /* System Init */
-    SystemInit();
-    
+    SystemInit();    
     /* Initialize LED's. Make sure to check settings for your board in tm_stm32f4_disco.h file */
     TM_DISCO_LedInit();
-    /* Initialize USB VCP */    
+    /* Initialize USB VCP */ 
+
+    // Led Red lights up during initialisation  
     TM_DISCO_LedOn(LED_RED);
-    // TM_USB_VCP_Init();
-    // TM_DISCO_LedOff(LED_RED);
-    // TM_USB_VCP_GetSettings
     TM_USB_VCP_Init();
     TM_DISCO_LedOff(LED_RED);
     
     while (1) {
         int out = TM_USB_VCP_GetStatus();
-
         /* USB configured OK, drivers OK */
-        if ( out == TM_USB_VCP_CONNECTED) {
-            
+        if ( out == TM_USB_VCP_CONNECTED) {            
             /* Turn on GREEN led */
             TM_DISCO_LedOff(LED_BLUE);
             TM_DISCO_LedOn(LED_GREEN);
@@ -56,9 +52,7 @@ int main(void) {
                 // waitCycles(1000);
             }else{
                 TM_DISCO_LedOff(LED_ORANGE);
-
             }
-
         } else {
             /* USB not OK */
             TM_DISCO_LedOn(LED_BLUE);

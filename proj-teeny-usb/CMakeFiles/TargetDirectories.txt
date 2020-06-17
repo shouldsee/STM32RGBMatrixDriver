@@ -1,0 +1,5 @@
+/data/repos/stm32/STM32RGBMatrixDriver/uart-test/CMakeFiles/edit_cache.dir
+/data/repos/stm32/STM32RGBMatrixDriver/uart-test/CMakeFiles/flash.dir
+/data/repos/stm32/STM32RGBMatrixDriver/uart-test/CMakeFiles/F4Matrix.dir
+/data/repos/stm32/STM32RGBMatrixDriver/uart-test/CMakeFiles/F4Matrix.bin.dir
+/data/repos/stm32/STM32RGBMatrixDriver/uart-test/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,8 @@
+- - __version__
+  - 0.0.8
+- - __class__.__name__
+  - TimeSizeStampRule
+- - to_ident
+  - - src/teeny_usb_init.h
+    - 1592281145.0438414
+    - 11405

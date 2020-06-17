@@ -42,6 +42,7 @@
 
 // #define MATRIX_WIDTH    64
 #define N_SCAN	4 
+#define SCAN_ROWS 4
 // #define N_SEGMENT	16
 #define N_SEGMENT	N_PANEL_WIDTH * N_PANEL_HEIGHT * 4
 #define N_POSITION	16
@@ -50,5 +51,11 @@
 #define MATRIX_SIZE     MATRIX_WIDTH*MATRIX_HEIGHT
 #define N_PANEL_WIDTH 2
 #define N_PANEL_HEIGHT 2
+
+
+#define MIN(x,y) (x<y)?x:y;
+
+#define X 0x50
+
 
 #endif

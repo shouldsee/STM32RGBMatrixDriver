@@ -338,6 +338,33 @@ data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPerip
 	$(MAKE) -f CMakeFiles/F4Matrix.dir/build.make CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c.s
 .PHONY : data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c.s
 
+data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.obj: data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj
+
+.PHONY : data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.obj
+
+# target to build an object file
+data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj:
+	$(MAKE) -f CMakeFiles/F4Matrix.dir/build.make CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj
+.PHONY : data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj
+
+data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.i: data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.i
+
+.PHONY : data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.i
+
+# target to preprocess a source file
+data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.i:
+	$(MAKE) -f CMakeFiles/F4Matrix.dir/build.make CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.i
+.PHONY : data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.i
+
+data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.s: data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.s
+
+.PHONY : data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.s
+
+# target to generate assembly for a file
+data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.s:
+	$(MAKE) -f CMakeFiles/F4Matrix.dir/build.make CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.s
+.PHONY : data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.s
+
 data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_disco.obj: data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_disco.c.obj
 
 .PHONY : data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_disco.obj
@@ -811,6 +838,9 @@ help:
 	@echo "... data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.obj"
 	@echo "... data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.i"
 	@echo "... data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.s"
+	@echo "... data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.obj"
+	@echo "... data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.i"
+	@echo "... data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.s"
 	@echo "... data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_disco.obj"
 	@echo "... data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_disco.i"
 	@echo "... data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_disco.s"

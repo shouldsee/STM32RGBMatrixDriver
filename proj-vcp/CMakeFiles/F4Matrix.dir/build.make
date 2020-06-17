@@ -441,9 +441,33 @@ CMakeFiles/F4Matrix.dir/src/system_stm32f4xx.c.obj.provides: CMakeFiles/F4Matrix
 CMakeFiles/F4Matrix.dir/src/system_stm32f4xx.c.obj.provides.build: CMakeFiles/F4Matrix.dir/src/system_stm32f4xx.c.obj
 
 
+CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj: CMakeFiles/F4Matrix.dir/flags.make
+CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj: /data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj"
+	arm-none-eabi-gcc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj   -c /data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c
+
+CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.i"
+	arm-none-eabi-gcc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c > CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.i
+
+CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.s"
+	arm-none-eabi-gcc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c -o CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.s
+
+CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj.requires:
+
+.PHONY : CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj.requires
+
+CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj.provides: CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj.requires
+	$(MAKE) -f CMakeFiles/F4Matrix.dir/build.make CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj.provides.build
+.PHONY : CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj.provides
+
+CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj.provides.build: CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj
+
+
 CMakeFiles/F4Matrix.dir/startup_src/startup_stm32f40xx.S.obj: CMakeFiles/F4Matrix.dir/flags.make
 CMakeFiles/F4Matrix.dir/startup_src/startup_stm32f40xx.S.obj: /home/shouldsee/stm32/STM32RGBMatrixDriver/proj-vcp/startup_src/startup_stm32f40xx.S
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building ASM object CMakeFiles/F4Matrix.dir/startup_src/startup_stm32f40xx.S.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building ASM object CMakeFiles/F4Matrix.dir/startup_src/startup_stm32f40xx.S.obj"
 	arm-none-eabi-gcc  $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -o CMakeFiles/F4Matrix.dir/startup_src/startup_stm32f40xx.S.obj -c /home/shouldsee/stm32/STM32RGBMatrixDriver/proj-vcp/startup_src/startup_stm32f40xx.S
 
 CMakeFiles/F4Matrix.dir/startup_src/startup_stm32f40xx.S.obj.requires:
@@ -459,7 +483,7 @@ CMakeFiles/F4Matrix.dir/startup_src/startup_stm32f40xx.S.obj.provides.build: CMa
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c.obj: CMakeFiles/F4Matrix.dir/flags.make
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c.obj: /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c.obj"
 	arm-none-eabi-gcc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c.obj   -c /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c.i: cmake_force
@@ -483,7 +507,7 @@ CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libr
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c.obj: CMakeFiles/F4Matrix.dir/flags.make
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c.obj: /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c.obj"
 	arm-none-eabi-gcc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c.obj   -c /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c.i: cmake_force
@@ -507,7 +531,7 @@ CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libr
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c.obj: CMakeFiles/F4Matrix.dir/flags.make
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c.obj: /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c.obj"
 	arm-none-eabi-gcc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c.obj   -c /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c.i: cmake_force
@@ -531,7 +555,7 @@ CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libr
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.c.obj: CMakeFiles/F4Matrix.dir/flags.make
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.c.obj: /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.c.obj"
 	arm-none-eabi-gcc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.c.obj   -c /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.c
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.c.i: cmake_force
@@ -555,7 +579,7 @@ CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libr
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.c.obj: CMakeFiles/F4Matrix.dir/flags.make
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.c.obj: /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.c.obj"
 	arm-none-eabi-gcc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.c.obj   -c /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.c
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.c.i: cmake_force
@@ -579,7 +603,7 @@ CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libr
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c.obj: CMakeFiles/F4Matrix.dir/flags.make
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c.obj: /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c.obj"
 	arm-none-eabi-gcc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c.obj   -c /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c.i: cmake_force
@@ -603,7 +627,7 @@ CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libr
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c.obj: CMakeFiles/F4Matrix.dir/flags.make
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c.obj: /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building C object CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c.obj"
 	arm-none-eabi-gcc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c.obj   -c /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c
 
 CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c.i: cmake_force
@@ -643,6 +667,7 @@ F4Matrix_OBJECTS = \
 "CMakeFiles/F4Matrix.dir/data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_gpio.c.obj" \
 "CMakeFiles/F4Matrix.dir/src/main.c.obj" \
 "CMakeFiles/F4Matrix.dir/src/system_stm32f4xx.c.obj" \
+"CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj" \
 "CMakeFiles/F4Matrix.dir/startup_src/startup_stm32f40xx.S.obj" \
 "CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c.obj" \
 "CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c.obj" \
@@ -671,6 +696,7 @@ F4Matrix: CMakeFiles/F4Matrix.dir/data/repos/stm32f429/00-STM32F429_LIBRARIES/tm
 F4Matrix: CMakeFiles/F4Matrix.dir/data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_gpio.c.obj
 F4Matrix: CMakeFiles/F4Matrix.dir/src/main.c.obj
 F4Matrix: CMakeFiles/F4Matrix.dir/src/system_stm32f4xx.c.obj
+F4Matrix: CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj
 F4Matrix: CMakeFiles/F4Matrix.dir/startup_src/startup_stm32f40xx.S.obj
 F4Matrix: CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c.obj
 F4Matrix: CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c.obj
@@ -681,7 +707,7 @@ F4Matrix: CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V
 F4Matrix: CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c.obj
 F4Matrix: CMakeFiles/F4Matrix.dir/build.make
 F4Matrix: CMakeFiles/F4Matrix.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Linking C executable F4Matrix"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Linking C executable F4Matrix"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/F4Matrix.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -705,6 +731,7 @@ CMakeFiles/F4Matrix.dir/requires: CMakeFiles/F4Matrix.dir/data/repos/stm32f429/0
 CMakeFiles/F4Matrix.dir/requires: CMakeFiles/F4Matrix.dir/data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_gpio.c.obj.requires
 CMakeFiles/F4Matrix.dir/requires: CMakeFiles/F4Matrix.dir/src/main.c.obj.requires
 CMakeFiles/F4Matrix.dir/requires: CMakeFiles/F4Matrix.dir/src/system_stm32f4xx.c.obj.requires
+CMakeFiles/F4Matrix.dir/requires: CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj.requires
 CMakeFiles/F4Matrix.dir/requires: CMakeFiles/F4Matrix.dir/startup_src/startup_stm32f40xx.S.obj.requires
 CMakeFiles/F4Matrix.dir/requires: CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c.obj.requires
 CMakeFiles/F4Matrix.dir/requires: CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c.obj.requires

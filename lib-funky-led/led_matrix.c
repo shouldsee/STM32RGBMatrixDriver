@@ -61,7 +61,10 @@ const int waits[] = { 5, 10, 20, 40, 80, 160, 320, 640 };
 // int bufferWidth = 60;
 
 int led_clear_buffer(uint32_t buffer[]){
-	memset(bufferA,0,sizeof(buffer));
+	for (int i=0; i<MATRIX_SIZE; i++){
+		buffer[i]=0;
+	}
+	// memset(buffer,0,sizeof(buffer));
 	return 0;
 }
 

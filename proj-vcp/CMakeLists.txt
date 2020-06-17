@@ -33,7 +33,30 @@ set(MATRIX_FILES
 #	src/stm32f4xx_it.c
 	#board/system_stm32f4xx.c
 	src/system_stm32f4xx.c
+
+	/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c
 	)
+
+
+include_directories(
+	"src"
+	"${STM32F4_STDPERIPH_DRIVER_DIR}/inc"
+	#"${CMSIS_DIR}/Device/ST/STM32F4xx/Include"
+	"${CMSIS_DIR}/Include"
+	"teeny_usb_stack/inc"
+	// "/data/local/repos/stm32/TeenyUSB/usb_stack/inc"
+#	"/data/repos/stm32/TeenyUSB"
+#	"/data/repos/stm32/stm32lib/STM32F4xx_HAL_Driver/Inc"
+#	"/data/repos/stm32/stm32lib/CMSIS/STM32F4xx/Include/"
+	"./board"
+	"/data/repos/stm32f429/00-STM32F429_LIBRARIES/"
+	"/data/repos/stm32f429/00-STM32F4xx_STANDARD_PERIPHERAL_DRIVERS/CMSIS/Device/ST/STM32F4xx/Include/"
+	"/data/repos/stm32f429/00-STM32F429_LIBRARIES/usb_cdc_device/"
+
+	/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/
+)
+link_libraries(m c gcc)
+
 
 set(STARTUP_FILES
 	startup_src/startup_stm32f40xx.S
@@ -52,24 +75,6 @@ set(STDPERIPH_FILES "${STM32F4_STDPERIPH_DRIVER_DIR}/src/misc.c")
 foreach(STDPERIPH_FUNCTION ${STDPERIPH_FUNCTIONS})
 	list(APPEND STDPERIPH_FILES ${STM32F4_STDPERIPH_DRIVER_DIR}/src/stm32f4xx_${STDPERIPH_FUNCTION}.c)
 endforeach()
-
-include_directories(
-	"src"
-	"${STM32F4_STDPERIPH_DRIVER_DIR}/inc"
-	#"${CMSIS_DIR}/Device/ST/STM32F4xx/Include"
-	"${CMSIS_DIR}/Include"
-	"teeny_usb_stack/inc"
-	// "/data/local/repos/stm32/TeenyUSB/usb_stack/inc"
-#	"/data/repos/stm32/TeenyUSB"
-#	"/data/repos/stm32/stm32lib/STM32F4xx_HAL_Driver/Inc"
-#	"/data/repos/stm32/stm32lib/CMSIS/STM32F4xx/Include/"
-	"./board"
-	"/data/repos/stm32f429/00-STM32F429_LIBRARIES/"
-	"/data/repos/stm32f429/00-STM32F4xx_STANDARD_PERIPHERAL_DRIVERS/CMSIS/Device/ST/STM32F4xx/Include/"
-	"/data/repos/stm32f429/00-STM32F429_LIBRARIES/usb_cdc_device/"
-
-)
-link_libraries(m c gcc)
 
 get_filename_component(LINKERSCRIPT startup_src/stm32_flash.ld ABSOLUTE)
 

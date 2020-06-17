@@ -196,6 +196,24 @@ stm32f4xx_usart.h
 stm32f4xx_rcc.h
 /data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.h
 
+/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/config_led_matrix.h
+
+/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c
+stdio.h
+-
+math.h
+/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/math.h
+string.h
+/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/string.h
+led_matrix.h
+/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.h
+stm32f4xx.h
+/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/stm32f4xx.h
+
+/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.h
+config_led_matrix.h
+/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/config_led_matrix.h
+
 /data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_disco.c
 tm_stm32f4_disco.h
 /data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_disco.h
@@ -451,6 +469,12 @@ tm_stm32f4_disco.h
 /home/shouldsee/stm32/STM32RGBMatrixDriver/proj-vcp/src/tm_stm32f4_disco.h
 defines.h
 /home/shouldsee/stm32/STM32RGBMatrixDriver/proj-vcp/src/defines.h
+stdio.h
+-
+stm32f4xx.h
+/home/shouldsee/stm32/STM32RGBMatrixDriver/proj-vcp/src/stm32f4xx.h
+led_matrix.h
+/home/shouldsee/stm32/STM32RGBMatrixDriver/proj-vcp/src/led_matrix.h
 
 /home/shouldsee/stm32/STM32RGBMatrixDriver/proj-vcp/src/stm32f4xx_conf.h
 stm32f4xx_adc.h

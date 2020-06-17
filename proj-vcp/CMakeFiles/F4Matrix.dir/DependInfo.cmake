@@ -34,6 +34,7 @@ set(CMAKE_ASM_TARGET_INCLUDE_PATH
   "/data/repos/stm32f429/00-STM32F429_LIBRARIES"
   "/data/repos/stm32f429/00-STM32F4xx_STANDARD_PERIPHERAL_DRIVERS/CMSIS/Device/ST/STM32F4xx/Include"
   "/data/repos/stm32f429/00-STM32F429_LIBRARIES/usb_cdc_device"
+  "/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led"
   )
 set(CMAKE_DEPENDS_CHECK_C
   "/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c" "/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c.obj"
@@ -43,6 +44,7 @@ set(CMAKE_DEPENDS_CHECK_C
   "/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c" "/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c.obj"
   "/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.c" "/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.c.obj"
   "/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c" "/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c.obj"
+  "/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c" "/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles/F4Matrix.dir/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led/led_matrix.c.obj"
   "/data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_disco.c" "/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles/F4Matrix.dir/data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_disco.c.obj"
   "/data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_gpio.c" "/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles/F4Matrix.dir/data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_gpio.c.obj"
   "/data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_usb_vcp.c" "/data/repos/stm32/STM32RGBMatrixDriver/proj-vcp/CMakeFiles/F4Matrix.dir/data/repos/stm32f429/00-STM32F429_LIBRARIES/tm_stm32f4_usb_vcp.c.obj"
@@ -87,6 +89,7 @@ set(CMAKE_C_TARGET_INCLUDE_PATH
   "/data/repos/stm32f429/00-STM32F429_LIBRARIES"
   "/data/repos/stm32f429/00-STM32F4xx_STANDARD_PERIPHERAL_DRIVERS/CMSIS/Device/ST/STM32F4xx/Include"
   "/data/repos/stm32f429/00-STM32F429_LIBRARIES/usb_cdc_device"
+  "/data/repos/stm32/STM32RGBMatrixDriver/lib-funky-led"
   )
 
 # Targets to which this target links.
